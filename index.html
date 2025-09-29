@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Selección de Área</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden; /* fuerza que nunca aparezca scroll */
+  }
+</style>
+</head>
+<body class="bg-gray-100">
+
+  <!-- HEADER -->
+  <header class="bg-white border-b-8 border-lime-500 flex items-center ">
+    <img src="sources/imagess/logo-eil.png" alt="EIL" class="h-20 w-auto px-10 py-2 my-2 ">
+  </header>
+
+<main class="w-full bg-[url('sources/imagess/fondo.jpg')] bg-center bg-cover flex items-center justify-center overflow-hidden" style="height: calc(100vh - 96px); ">
+  <!-- Caja de contenido -->
+  <div class="bg-white/60 rounded-2xl shadow-lg p-8 w-[90%] max-w-6xl">
+    <h2 class="text-xl font-bold text-gray-800 mb-6 text-center">
+      Seleccione el área que pertenezca
+    </h2>
+
+    <!-- GRID DE BOTONES -->
+    <div id="contenedor" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 text-center">
+    </div>
+  </div>
+</main>
+  <!-- SCRIPT -->
+  <script>
+    const areas = [
+      {nombre : "Desorción", color:"bg-blue-900 text-white"},
+      {nombre : "T.I", color:"bg-lime-500 text-black"},
+      {nombre : "Fundición y refinación", color:"bg-blue-900 text-white"},
+      {nombre : "Administración", color:"bg-lime-500 text-black"},
+      {nombre : "Laboratorio quimico", color:"bg-blue-900 text-white"},
+      {nombre : "Laboratorio metalurgico", color:"bg-lime-500 text-black"},
+      {nombre : "Mantenimiento", color:"bg-blue-900 text-white"},
+      {nombre : "Ssoma", color:"bg-lime-500 text-black"},
+      {nombre : "Almacen", color:"bg-blue-900 text-white"} 
+    ];
+
+    const contenedor = document.getElementById("contenedor");
+
+    areas.forEach(area =>{
+      const input = document.createElement("input");
+      input.type = "button";
+      input.value = area.nombre;
+      input.className = `w-full h-16 cursor-pointer rounded-xl font-semibold text-lg shadow-md hover:scale-105 transition-transform ${area.color}`;
+      input.onclick = () => inicio(area.nombre);
+      contenedor.appendChild(input);
+    });
+
+    function inicio(valor){
+      window.location.href="inicio.html?area=" + encodeURIComponent(valor);
+    }
+  </script>
+</body>
+</html>
