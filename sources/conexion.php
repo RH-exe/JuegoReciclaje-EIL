@@ -3,7 +3,7 @@ $local ="localhost";
 $port = "3306";
 $db="recycling_web";
 $username ="root";
-$contra ="";
+$contra ="root";
 
 try{
     $conexion =  new PDO("mysql:host=$local;port=$port;dbname=$db;charset=utf8",$username,$contra);

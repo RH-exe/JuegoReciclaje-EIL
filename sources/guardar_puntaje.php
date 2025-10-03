@@ -15,7 +15,7 @@ if (!$usuario_id) {
 
 try {
     // Verificar si ya existe un registro para ese usuario
-    $sql = "SELECT * FROM puntajes WHERE U_idUsuario = :id";
+    $sql = "SELECT * FROM usuario WHERE U_idUsuario = :id";
     $stmt = $conexion->prepare($sql);
     $stmt->execute([":id" => $usuario_id]);
     $existe = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -23,11 +23,11 @@ try {
     if ($existe) {
         // Si existe, actualizar la columna del nivel
         if ($nivel == 1) {
-            $sql = "UPDATE puntajes 
+            $sql = "UPDATE usuario
                     SET p_Nivel1 = :puntaje, p_fecha = NOW() 
                     WHERE U_idUsuario = :id";
         } else {
-            $sql = "UPDATE puntajes 
+            $sql = "UPDATE usuario 
                     SET p_Nivel2 = :puntaje, p_fecha = NOW() 
                     WHERE U_idUsuario = :id";
         }
@@ -36,10 +36,10 @@ try {
     } else {
         // Si no existe, insertar nuevo registro
         if ($nivel == 1) {
-            $sql = "INSERT INTO puntajes (U_idUsuario, p_Nivel1, p_Nivel2) 
+            $sql = "INSERT INTO usuario (U_idUsuario, p_Nivel1, p_Nivel2) 
                     VALUES (:id, :puntaje, 0)";
         } else {
-            $sql = "INSERT INTO puntajes (U_idUsuario, p_Nivel1, p_Nivel2) 
+            $sql = "INSERT INTO usuario (U_idUsuario, p_Nivel1, p_Nivel2) 
                     VALUES (:id, 0, :puntaje)";
         }
         $stmt = $conexion->prepare($sql);
