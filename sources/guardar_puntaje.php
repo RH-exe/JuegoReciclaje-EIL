@@ -24,11 +24,11 @@ try {
         // Si existe, actualizar la columna del nivel
         if ($nivel == 1) {
             $sql = "UPDATE usuario
-                    SET p_Nivel1 = :puntaje, p_fecha = NOW() 
+                    SET p_Nivel1 = :puntaje
                     WHERE U_idUsuario = :id";
         } else {
             $sql = "UPDATE usuario 
-                    SET p_Nivel2 = :puntaje, p_fecha = NOW() 
+                    SET p_Nivel2 = :puntaje
                     WHERE U_idUsuario = :id";
         }
         $stmt = $conexion->prepare($sql);
