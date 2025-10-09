@@ -548,40 +548,19 @@
         // si ya no quedan residuos, terminar
         const itemsRec = document.getElementById('itemsReciclar');
         if (itemsRec.children.length === 0) {
-          Swal.fire('🎉 Fin del Juego', `${respuestasJugadores[jugadorActivo].nombre} terminó con ${respuestasJugadores[jugadorActivo].puntaje} puntos`, 'success').then(() => {
             if (jugadorActivo) guardarPuntaje(jugadorActivo, respuestasJugadores[jugadorActivo].puntaje, 2);
 
             // mostrar opción para jugar otra vez o volver a inicio
-            Swal.fire({
-              title: 'Termino el juego',
-              icon: 'success',
-              confirmButtonText: 'ok'
-            }).then(() => {
+            Swal.fire('🎉 Fin del Juego', `${respuestasJugadores[jugadorActivo].nombre} terminó con ${respuestasJugadores[jugadorActivo].puntaje} puntos`, 'success').then(() => {
               guardarPuntaje(jugadorActivo,respuestasJugadores[jugadorActivo].puntaje,2);
               document.getElementById('nivel2').classList.add('hidden');
               document.getElementById('nivel1').classList.remove('hidden');
-              jugadorActivo= '-';
+              setJugadorActivo('-');
+              jugadorActivo = null;
               iniciarNivel1();
             });
-          });
         }
       }
-      
-    
-      function resetForReplay() {
-        // reinicia datos del jugador (si quieres mantener puntaje en BD ya está guardado)
-        if (jugadorActivo) respuestasJugadores[jugadorActivo].puntaje = 0;
-        const liJugador = [...listaJugador.children].find(li => li.dataset.jugador === jugadorActivo);
-        if (liJugador) liJugador.querySelector('span:last-child').textContent = 0;
-        currentBadge.textContent = 'Puntos: 0';
-
-        // volver al nivel 1
-        document.getElementById('nivel2').classList.add('hidden');
-        document.getElementById('nivel1').classList.remove('hidden');
-        jugadorActivo = '-';
-        iniciarNivel1();
-      }
-
     }
 
     // ---------------------------
@@ -591,14 +570,11 @@
       const sb = document.getElementById('sidebar');
       sb.classList.toggle('hidden');
     });
-
     document.getElementById('resetGame').addEventListener('click', () => {
       // reinicia todo (estado local)
       Object.keys(respuestasJugadores).forEach(k => { respuestasJugadores[k].puntaje = 0; respuestasJugadores[k].respondidos = {}; });
       [...listaJugador.children].forEach(li => li.querySelector('span:last-child').textContent = '0');
       currentBadge.textContent = '';
-      jugadorActivo = null;
-      jugadorActivoDisplay.textContent = '—';
       iniciarNivel1();
       document.getElementById('nivel2').classList.add('hidden');
       document.getElementById('nivel1').classList.remove('hidden');

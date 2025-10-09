@@ -24,7 +24,7 @@
 <main class="w-full bg-[url('sources/imagess/fondo.jpg')] bg-center bg-cover flex items-center justify-center overflow-hidden" style="height: calc(100vh - 96px); ">
   <!-- Caja de contenido -->
   <div class="bg-white/60 rounded-2xl shadow-lg p-8 w-[90%] max-w-6xl">
-    <h2 class="text-xl font-bold text-gray-800 mb-6 text-center">
+    <h2 class="text-xl font-bold text-gray-800 mb-6 text-center uppercase">
       Seleccione el área que pertenezca
     </h2>
 
@@ -44,32 +44,54 @@
       {nombre : "Laboratorio metalurgico", color:"bg-lime-500 text-black",  puntaje : 0},
       {nombre : "Mantenimiento", color:"bg-blue-900 text-white",  puntaje : 0},
       {nombre : "Ssoma", color:"bg-lime-500 text-black",  puntaje : 0},
-      {nombre : "Ssoma", color:"bg-lime-500 text-black",  puntaje : 0},
       {nombre : "Almacen", color:"bg-blue-900 text-white",  puntaje : 0} 
     ];
 
     const contenedor = document.getElementById("contenedor");
 
-    areas.forEach(area =>{
-      const button = document.createElement("button");
-      button.className = `w-full h-16 cursor-pointer rounded-xl font-semibold text-xl shadow-md hover:scale-105 transition-transform flex flex-col justify-center ${area.color}`;
-      button.onclick = () => inicio(area.nombre);
+    function blockArea (){
+      contenedor.innerHTML = "";
+      areas.forEach(area =>{          
+        const button = document.createElement("button");
+        button.className = `w-full h-16 cursor-pointer rounded-xl font-semibold text-xl shadow-md hover:scale-105 transition-transform flex flex-col justify-center ${area.color}`;
+        button.onclick = () => inicio(area.nombre);
 
-      const nombre = document.createElement("span");
-      nombre.textContent = area.nombre;
+        const nombre = document.createElement("span");
+        nombre.textContent = area.nombre;
 
-      const puntaje = document.createElement("span");
-      puntaje.textContent = `Puntaje: ${area.puntaje ?? 0}`;
-      puntaje.className= 'text-red-600  text-xs'
+        const puntaje = document.createElement("span");
+        puntaje.textContent = `Puntaje: ${area.puntaje ?? 0}`;
+        puntaje.className= 'text-red-600  text-xs'
 
-      button.appendChild(nombre);
-      button.appendChild(puntaje);
-      contenedor.appendChild(button);
-    });
+        button.appendChild(nombre);
+        button.appendChild(puntaje);
+        contenedor.appendChild(button);
+      })
+    };
+
+    async function cargarPuntaje() {
+      try{
+        const res = await fetch("sources/puntajeArea.php");
+        if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
+        const data = await res.json();
+
+        console.log("Datos recibidos:", data);
+
+        areas.forEach(area =>{
+            area.puntaje = data[area.nombre];
+        });
+
+        rederAreas();
+      }catch(err){
+        console.error("error al cargar el puntaje", err);
+        blockArea();
+      }
+    }
 
     function inicio(valor){
       window.location.href="inicio.html?area=" + encodeURIComponent(valor);
     }
+    cargarPuntaje();
   </script>
 </body>
 </html>
