@@ -363,8 +363,7 @@
       // Revisar si terminó el nivel
       if (contenedorNombre.children.length === 0) {
         Swal.fire(
-          'Nivel 1 TERMINADO',
-          `${respuestasJugadores[jugadorActivo].nombre} terminó con ${respuestasJugadores[jugadorActivo].puntaje} puntos`
+          'Nivel 1 TERMINADO',`${respuestasJugadores[jugadorActivo].nombre} terminó con ${respuestasJugadores[jugadorActivo].puntaje} puntos`
         ).then(() => {
           if (jugadorActivo) {
             guardarPuntaje(jugadorActivo, respuestasJugadores[jugadorActivo].puntaje, 1).then(()=>{              
@@ -381,9 +380,7 @@
         });
       }
     }
-  }
-
-    
+  }    
 
     function evaluarInput(input, jugador) {
       if (!jugador) {
@@ -563,15 +560,11 @@
       }
     }
 
-    // ---------------------------
-    // UI helpers
-    // ---------------------------
     document.getElementById('togglePlayers').addEventListener('click', () => {
       const sb = document.getElementById('sidebar');
       sb.classList.toggle('hidden');
     });
     document.getElementById('resetGame').addEventListener('click', () => {
-      // reinicia todo (estado local)
       Object.keys(respuestasJugadores).forEach(k => { respuestasJugadores[k].puntaje = 0; respuestasJugadores[k].respondidos = {}; });
       [...listaJugador.children].forEach(li => li.querySelector('span:last-child').textContent = '0');
       currentBadge.textContent = '';
