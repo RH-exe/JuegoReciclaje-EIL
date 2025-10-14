@@ -248,12 +248,12 @@
     // ---------------------------
     // Guardar puntaje (backend)
     // ---------------------------
-    function guardarPuntaje(usuarioID, puntaje, nivel = 1) {
-      if (!usuarioID) return Promise.resolve();
+    function guardarPuntaje(jugadorActivo, puntaje, nivel = 1) {
+
       return fetch('sources/guardar_puntaje.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ usuario_id: usuarioID, puntaje: puntaje, nivel: nivel })
+        body: JSON.stringify({ usuario_id: jugadorActivo,puntaje: puntaje, nivel: nivel})
       })
       .then(async res =>{
         const text= await res.text();
@@ -578,14 +578,26 @@
     document.getElementById('resetGame').addEventListener('click', () => {
       // reinicia todo (estado local)
       Object.keys(respuestasJugadores).forEach(k => { respuestasJugadores[k].puntaje = 0; respuestasJugadores[k].respondidos = {}; });
-      const UsuarioID = localStorage.getItem('usuario_id');
-
+      
+      const usuarioID = localStorage.getItem('usuario_id');
+      if (!usuarioID) {
+        console.error("⚠️ No hay usuario activo en localStorage");
+        return;
+      }
       fetch('sources/obtener_puntaje.php',{
         method: 'POST',
-        headers: {'content-type': 'application/json'},
-        body: JSON.stringify({usuario_id: usuarioID})
+        headers: {'content-type':'application/json'},
+        body: JSON.stringify({usuario_id: jugadorActivo})
       })
-      .then (res => res.json())
+      .then (async res => {
+        const text = await res.text();
+        try {
+          return JSON.parse(text);
+        } catch {
+          console.error("❌ La respuesta no es un JSON válido:", text);
+          throw new Error("Respuesta no válida del servidor");
+        }
+      })
       .then(data=>{
         if(data.status === 'ok' && data.data){
           const total = data.data.puntaje_total;

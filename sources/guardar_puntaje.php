@@ -33,8 +33,9 @@ try {
         }
         $stmt = $conexion->prepare($sql);
         $stmt->execute([":puntaje" => $puntaje, ":id" => $usuario_id]);
+        echo json_encode(["status" => "ok", "msg" => "Puntaje actualizado correctamente"]);
     }
 } catch (PDOException $e) {
     echo json_encode(["status" => "error", "msg" => $e->getMessage()]);
 }
-?>
+
