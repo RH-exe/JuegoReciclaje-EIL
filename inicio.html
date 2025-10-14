@@ -255,7 +255,15 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ usuario_id: usuarioID, puntaje: puntaje, nivel: nivel })
       })
-      .then(res => res.json())
+      .then(async res =>{
+        const text= await res.text();
+        try{
+          return JSON.parse(text);
+        }catch{
+          console.error("respues no es un JSON", text);
+          throw new Error ("respuesta no valida del servidor");
+        }
+      })
       .then(data => {
         if (data.status === 'ok') {
           console.log('Puntaje guardado');
@@ -560,13 +568,37 @@
       }
     }
 
+    // ---------------------------
+    // UI helpers
+    // ---------------------------
     document.getElementById('togglePlayers').addEventListener('click', () => {
       const sb = document.getElementById('sidebar');
       sb.classList.toggle('hidden');
     });
     document.getElementById('resetGame').addEventListener('click', () => {
+      // reinicia todo (estado local)
       Object.keys(respuestasJugadores).forEach(k => { respuestasJugadores[k].puntaje = 0; respuestasJugadores[k].respondidos = {}; });
-      [...listaJugador.children].forEach(li => li.querySelector('span:last-child').textContent = '0');
+      const UsuarioID = localStorage.getItem('usuario_id');
+
+      fetch('sources/obtener_puntaje.php',{
+        method: 'POST',
+        headers: {'content-type': 'application/json'},
+        body: JSON.stringify({usuario_id: usuarioID})
+      })
+      .then (res => res.json())
+      .then(data=>{
+        if(data.status === 'ok' && data.data){
+          const total = data.data.puntaje_total;
+          [...listaJugador.children].forEach(li=>{
+            li.querySelector('span:last-child').textContent = total;
+          });
+          console.log('puntaje:', total);
+        }else{
+          console.log('Error al obtener puntaje', data.msg);
+        }
+      })
+      .catch(err => console.error('error', err));
+
       currentBadge.textContent = '';
       iniciarNivel1();
       document.getElementById('nivel2').classList.add('hidden');
