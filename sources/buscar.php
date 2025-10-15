@@ -1,9 +1,6 @@
 <?php
 header("Content-Type: application/json; charset=utf-8");
-require_once "conexion.php"; // 👈 ya que buscar.php y conexion.php están en la misma carpeta
-
-
-
+require_once "conexion.php"; 
 
 $area = $_GET["area"] ?? "";
 
