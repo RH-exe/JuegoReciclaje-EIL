@@ -148,21 +148,39 @@
     const nombreTachosAleatorios = [...nombreTachos].sort(() => Math.random() -0.5);
 
     const residuos =[
-            {id: 1, nombre:"Lata de metal", imagen : "sources/imagess/metal-lata.jpg", puntaje: 1, tacho: ""},
-            {id: 2, nombre:"Recogedor de metal", imagen : "sources/imagess/metal-recogedor.jpg", puntaje: 1, tacho: ""},
-            {id: 3, nombre:"Tornillos de metal", imagen : "sources/imagess/metal-tornillos.jpeg", puntaje: 1, tacho: ""},
-            {id: 4, nombre:"Caja de papel", imagen : "sources/imagess/papel-caja.jpg", puntaje: 1, tacho: "azul"},
-            {id: 5, nombre:"Cuaderno", imagen : "sources/imagess/papel-cuaderno.jpg", puntaje: 1, tacho: ""},
-            {id: 6, nombre:"Hoja Bond", imagen : "sources/imagess/papel-hoja bond.jpg", puntaje: 1, tacho: "azul"},
-            {id: 7, nombre:"Periodico", imagen : "sources/imagess/papel-periodico.jpg", puntaje: 1, tacho: "azul"},
-            {id: 8, nombre:"Revista", imagen : "sources/imagess/papel-revista.jpeg", puntaje: 1, tacho: ""},
-            {id: 9, nombre:"Sobremanila", imagen : "sources/imagess/papel-sobremanila.jpg", puntaje: 1, tacho: ""},
-            {id: 10, nombre:"Botella de plastico", imagen : "sources/imagess/plastico- botellas.jpg", puntaje: 1, tacho: ""},
-            {id: 11, nombre:"Bolsa de plastico", imagen : "sources/imagess/plastico-bolsa.webp", puntaje: 1, tacho: ""},
-            {id: 12, nombre:"Botella de Yogurt", imagen : "sources/imagess/plastico-botella yogur.webp", puntaje: 1, tacho: ""},
-            {id: 13, nombre:"Film", imagen : "sources/imagess/plastico-film.jpg", puntaje: 1, tacho: ""},
-            {id: 14, nombre:"Taper de plastico", imagen : "sources/imagess/plastico-taper.webp", puntaje: 1, tacho: ""},
-            {id: 15, nombre:"Vaso de plastico", imagen : "sources/imagess/plastico-vaso plastico.webp", puntaje: 1, tacho: ""},
+            {id: 1, nombre:"Lata de metal", imagen : "sources/imagess/metal-lata.jpg", tacho: "amarillo"},
+            {id: 2, nombre:"Recogedor de metal", imagen : "sources/imagess/metal-recogedor.jpg", tacho: "amarillo"},
+            {id: 3, nombre:"Tornillos de metal", imagen : "sources/imagess/metal-tornillos.jpeg", tacho: "amarillo"},
+            {id: 4, nombre:"Caja de papel", imagen : "sources/imagess/papel-caja.jpg", tacho: "azul"},
+            {id: 5, nombre:"Cuaderno", imagen : "sources/imagess/papel-cuaderno.jpg", tacho: "azul"},
+            {id: 6, nombre:"Hoja Bond", imagen : "sources/imagess/papel-hoja bond.jpg", tacho: "azul"},
+            {id: 7, nombre:"Periodico", imagen : "sources/imagess/papel-periodico.jpg", tacho: "azul"},
+            {id: 8, nombre:"Revista", imagen : "sources/imagess/papel-revista.jpeg", tacho: "azul"},
+            {id: 9, nombre:"Sobremanila", imagen : "sources/imagess/papel-sobremanila.jpg", tacho: "azul"},
+            {id: 10, nombre:"Botella de plastico", imagen : "sources/imagess/plastico- botellas.jpg", tacho: "blanco"},
+            {id: 11, nombre:"Bolsa de plastico", imagen : "sources/imagess/plastico-bolsa.webp", tacho: "blanco"},
+            {id: 12, nombre:"Botella de Yogurt", imagen : "sources/imagess/plastico-botella yogur.webp", tacho: "blanco"},
+            {id: 13, nombre:"Film", imagen : "sources/imagess/plastico-film.jpg",  tacho: "blanco"},
+            {id: 14, nombre:"Taper de plastico", imagen : "sources/imagess/plastico-taper.webp", tacho: "blanco"},
+            {id: 15, nombre:"Aerosol", imagen : "sources/imagess/AEROSOL PELIGROSO.jpg", tacho: "rojo"},
+            {id: 16, nombre:"Arerpe", imagen : "sources/imagess/ARERPE PELIGRPP.jpg", tacho: "rojo"},
+            {id: 17, nombre:"Botella de Vidrio", imagen : "sources/imagess/BOTELLA VIDRIO.jpg", tacho: "plomo"},
+            {id: 18, nombre:"Cables", imagen : "sources/imagess/CABLES METAL.jpg", tacho: "amarillo"},
+            {id: 19, nombre:"Caja Sucia", imagen : "sources/imagess/CAJA SUCIA GENERALES.jpg", tacho: "negro"},
+            {id: 20, nombre:"Celular", imagen : "sources/imagess/CELULAR RAEE.jpg", tacho: "verde"},
+            {id: 21, nombre:"Cepillo", imagen : "sources/imagess/CEPILLO GENERALES.jpg", tacho: "negro"},
+            {id: 22, nombre:"Cigarillo", imagen : "sources/imagess/CIGARRILLO GENERALES.jpg", tacho: "negro"},
+            {id: 23, nombre:"Clavos", imagen : "sources/imagess/CLAVOS METAL.jpg", tacho: "amarillo"},
+            {id: 24, nombre:"Espejo", imagen : "sources/imagess/ESPEJO VIDRIO.jpg", tacho: "plomo"},
+            {id: 25, nombre:"Papel", imagen : "sources/imagess/GENERALES PAPEL.jpg", tacho: "negro"},
+            {id: 26, nombre:"Tecnopor", imagen : "sources/imagess/GENERALES TENCOPOR.webpjpg", tacho: "negro"},
+            {id: 27, nombre:"Hojas", imagen : "sources/imagess/HOJAS ORGANICO.jpg", tacho: "naranja"},
+            {id: 28, nombre:"Impresor", imagen : "sources/imagess/IMPRESOR RAEE.jpg", tacho: "verde"},
+            {id: 29, nombre:"Jeringas", imagen : "sources/imagess/JERINGAS PELIGROSO.jpg", tacho: "negro"},
+            {id: 30, nombre:"Laboratorio", imagen : "sources/imagess/LABORATORIO VIDRIO.jpg", tacho: "plomo"},
+            {id: 31, nombre:"Latas", imagen : "sources/imagess/LATAS METAL.jpg", tacho: "amarillo"},
+            {id: 32, nombre:"Latas", imagen : "sources/imagess/LATAS PELIGROSOSO.jpg", tacho: "rojo"},
+            {id: 33, nombre:"Luna", imagen : "sources/imagess/LUNA VIDRIO.png", tacho: "plomo"}
         ];
 
         const residuosAleatorios = [...residuos]
@@ -248,12 +266,12 @@
     // ---------------------------
     // Guardar puntaje (backend)
     // ---------------------------
-    function guardarPuntaje(jugadorActivo, puntaje, nivel = 1) {
+    function guardarPuntaje(jugadorActivo, puntaje) {
 
       return fetch('sources/guardar_puntaje.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ usuario_id: jugadorActivo,puntaje: puntaje, nivel: nivel})
+        body: JSON.stringify({ usuario_id: jugadorActivo,puntaje: puntaje})
       })
       .then(async res =>{
         const text= await res.text();
@@ -335,7 +353,7 @@
     });
 
     function handleDropNombre(nombretacho, tacho) {
-      const nombre = nombreTachos.find(n => n.nombre === nombretacho); // comparación correcta
+      const nombre = nombreTachos.find(n => n.nombre === nombretacho); 
       if (!nombre) return;
 
       if (!jugadorActivo) {
@@ -377,11 +395,8 @@
           'Nivel 1 TERMINADO',`${respuestasJugadores[jugadorActivo].nombre} terminó con ${respuestasJugadores[jugadorActivo].puntaje} puntos`
         ).then(() => {
           if (jugadorActivo) {
-            guardarPuntaje(jugadorActivo, respuestasJugadores[jugadorActivo].puntaje, 1).then(()=>{              
-              respuestasJugadores[jugadorActivo].puntaje = 0;
+            guardarPuntaje(jugadorActivo, respuestasJugadores[jugadorActivo].puntaje).then(()=>{
               const liJugador = [...listaJugador.children].find(li => li.dataset.jugador === jugadorActivo);
-              if (liJugador) liJugador.querySelector('span:last-child').textContent = 0;
-              currentBadge.textContent = 'Puntos: 0';
 
               document.getElementById('nivel1').classList.add('hidden');
               document.getElementById('nivel2').classList.remove('hidden');
@@ -536,10 +551,13 @@
 
         if (residuo.tacho === tacho.color) {
           Swal.fire({ toast:true, position:'top-end', icon:'success', title:`${residuo.nombre} va en ${tacho.nombre}`, showConfirmButton:false, timer:900 });
-          respuestasJugadores[jugadorActivo].puntaje += residuo.puntaje;
+          respuestasJugadores[jugadorActivo].puntaje += 1;
         } else {
           Swal.fire({ toast:true, position:'top-end', icon:'error', title:`${residuo.nombre} no va en ${tacho.nombre}`, showConfirmButton:false, timer:900 });
-          respuestasJugadores[jugadorActivo].puntaje -= 5;
+          function respuestaDecimal(num, decimales =2){
+            return parseFloat(num.toFixed(decimales));
+          }
+          respuestasJugadores[jugadorActivo].puntaje = respuestaDecimal(respuestasJugadores[jugadorActivo].puntaje -0.35)
         }
 
         // actualizar UI puntaje
@@ -556,11 +574,11 @@
         // si ya no quedan residuos, terminar
         const itemsRec = document.getElementById('itemsReciclar');
         if (itemsRec.children.length === 0) {
-            if (jugadorActivo) guardarPuntaje(jugadorActivo, respuestasJugadores[jugadorActivo].puntaje, 2);
+            if (jugadorActivo) guardarPuntaje(jugadorActivo, respuestasJugadores[jugadorActivo].puntaje);
 
             // mostrar opción para jugar otra vez o volver a inicio
             Swal.fire('🎉 Fin del Juego', `${respuestasJugadores[jugadorActivo].nombre} terminó con ${respuestasJugadores[jugadorActivo].puntaje} puntos`, 'success').then(() => {
-              guardarPuntaje(jugadorActivo,respuestasJugadores[jugadorActivo].puntaje,2);
+              guardarPuntaje(jugadorActivo,respuestasJugadores[jugadorActivo].puntaje);
               document.getElementById('nivel2').classList.add('hidden');
               document.getElementById('nivel1').classList.remove('hidden');
               setJugadorActivo('-');

@@ -3,7 +3,7 @@
     include ("conexion.php");
     
     try{
-        $sql="SELECT u_Area, SUM(p_Nivel1 + p_Nivel2) AS total 
+        $sql="SELECT u_Area, SUM(puntaje) AS total 
         from usuario group BY u_Area"; 
 
         $stmt = $conexion->prepare($sql);

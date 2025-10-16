@@ -18,24 +18,19 @@ try {
     $sql = "SELECT * FROM usuario WHERE u_idUsuario = :id";
     $stmt = $conexion->prepare($sql);
     $stmt->execute([":id" => $usuario_id]);
-    $existe = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($existe) {
-        // Si existe, actualizar la columna del nivel
-        if ($nivel == 1) {
-            $sql = "UPDATE usuario
-                    SET p_Nivel1 = :puntaje
-                    WHERE u_idUsuario = :id";
-        } else {
-            $sql = "UPDATE usuario 
-                    SET p_Nivel2 = :puntaje
-                    WHERE u_idUsuario = :id";
-        }
-        $stmt = $conexion->prepare($sql);
-        $stmt->execute([":puntaje" => $puntaje, ":id" => $usuario_id]);
-        echo json_encode(["status" => "ok", "msg" => "Puntaje actualizado correctamente"]);
+    if ($stmt->rowCount() > 0) {
+        // Actualiza el puntaje (como texto)
+        $sqlUpdate = "UPDATE usuario SET puntaje = :puntaje WHERE u_idUsuario = :id";
+        $stmtUpdate = $conexion->prepare($sqlUpdate);
+        $stmtUpdate->execute([
+            ':puntaje' => strval($puntaje), // 👈 fuerza el valor a string
+            ':id' => $usuario_id
+        ]);
+        echo json_encode(["status" => "ok", "msg" => "Puntaje actualizado"]);
+    } else {
+        echo json_encode(["status" => "error", "msg" => "Usuario no encontrado"]);
     }
 } catch (PDOException $e) {
     echo json_encode(["status" => "error", "msg" => $e->getMessage()]);
 }
-
