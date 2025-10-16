@@ -185,7 +185,7 @@
 
         const residuosAleatorios = [...residuos]
         .sort(() => Math.random() -5)
-        .slice(0,10);
+        .slice(0,12);
 
     // ---------------------------
     // DOM references
@@ -256,22 +256,31 @@
 
     function setJugadorActivo(id) {
       jugadorActivo = id;
+      let contador = 0;
+      let segundos = 0;
+
+      if(contador) clearInterval(contador);
+      segundos=0;
       // Highlight selected
       [...listaJugador.children].forEach(li => li.classList.toggle('bg-lime-50', li.dataset.jugador === id));
       const data = respuestasJugadores[id];
       jugadorActivoDisplay.textContent = data ? data.nombre : '—';
-      currentBadge.textContent = data ? `Puntos: ${data.puntaje}` : '';
+      contador = setInterval(() =>{
+        segundos ++;     
+        const minutos = Math.floor(segundos/60);
+        const restoSegundos = segundos%60;   
+        currentBadge.textContent = data ? `Tiempo: ${minutos}m ${restoSegundos}s ` : '';
+      }, 1000);
     }
 
     // ---------------------------
     // Guardar puntaje (backend)
     // ---------------------------
     function guardarPuntaje(jugadorActivo, puntaje) {
-
       return fetch('sources/guardar_puntaje.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ usuario_id: jugadorActivo,puntaje: puntaje})
+        body: JSON.stringify({ usuario_id: jugadorActivo,puntaje: puntaje,})
       })
       .then(async res =>{
         const text= await res.text();
@@ -291,6 +300,50 @@
       })
       .catch(err => console.error('Error enviando puntaje:', err));
     }
+    
+    function guardarTiempo(jugadorActivo) {
+      const tiempoTexto = currentBadge.textContent.trim();
+      console.log("Texto del badge:", tiempoTexto);
+
+      // Soporta "Tiempo: 1m 23s" o "Tiempo: 54s"
+      const match = tiempoTexto.match(/(?:(\d+)m)?\s*(\d+)s/);
+
+      let minutos = 0, segundos = 0;
+      if (match) {
+        minutos = parseInt(match[1] || 0);
+        segundos = parseInt(match[2] || 0);
+      }
+
+      const totalSegundos = minutos * 60 + segundos;
+      console.log("Jugador activo:", jugadorActivo, "Tiempo total:", totalSegundos);
+
+      return fetch('sources/guardarTiempo.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          usuario_id: jugadorActivo,
+          tiempo: totalSegundos // enviar entero
+        })
+      })
+      .then(async res => {
+        const text = await res.text();
+        try {
+          return JSON.parse(text);
+        } catch {
+          console.error("Respuesta no es JSON:", text);
+          throw new Error("Respuesta no válida del servidor");
+        }
+      })
+      .then(data => {
+        if (data.status === 'success') {
+          console.log(`✅ Tiempo guardado: ${totalSegundos}s`);
+        } else {
+          console.error('⚠️ Error al guardar tiempo:', data.msg);
+        }
+      })
+      .catch(err => console.error('❌ Error enviando tiempo:', err));
+    }
+
 
     // ---------------------------
     // Nivel 1
@@ -354,7 +407,6 @@
 
     function handleDropNombre(nombretacho, tacho) {
       const nombre = nombreTachos.find(n => n.nombre === nombretacho); 
-      if (!nombre) return;
 
       if (!jugadorActivo) {
         Swal.fire('Atención', 'Debe seleccionar un jugador antes de jugar', 'warning');
@@ -365,19 +417,12 @@
         Swal.fire({toast: true, position: 'top-end', icon: 'success', title: `${nombre.nombre} va en el contenedor ${tacho.color}`, showConfirmButton: false, timer: 900
         });
         respuestasJugadores[jugadorActivo].puntaje += 1; 
-      } else {
-        Swal.fire({
-          toast: true,
-          position: 'top-end',
-          icon: 'error',
-          title: `${nombre.nombre} no va en el contenedor ${tacho.color}`,
-          showConfirmButton: false,
-          timer: 900
-        });
-        function ajustarDecimal(num, decimales=2){
-          return parseFloat(num.toFixed(decimales));
-        }
-        respuestasJugadores[jugadorActivo].puntaje = ajustarDecimal(respuestasJugadores[jugadorActivo].puntaje - 0.35);
+      } else {       
+        const elem = document.querySelector(`[data-nombretacho="${nombretacho}"]`);
+        elem.classList.add('bg-red-600');
+        setTimeout(() => {
+          elem.classList.remove('bg-red-600');
+        }, 1000);
       }
 
       // Actualizar puntaje en la lista
@@ -387,7 +432,9 @@
 
       // Eliminar el nombre arrastrado
       const elem = document.querySelector(`[data-nombretacho="${nombretacho}"]`);
-      if (elem) elem.remove();
+      if(nombre.nombre === tacho.nombre){       
+        if (elem) elem.remove();  
+      }
 
       // Revisar si terminó el nivel
       if (contenedorNombre.children.length === 0) {
@@ -574,7 +621,11 @@
         // si ya no quedan residuos, terminar
         const itemsRec = document.getElementById('itemsReciclar');
         if (itemsRec.children.length === 0) {
-            if (jugadorActivo) guardarPuntaje(jugadorActivo, respuestasJugadores[jugadorActivo].puntaje);
+            if (jugadorActivo) {
+              guardarPuntaje(jugadorActivo, respuestasJugadores[jugadorActivo].puntaje)
+              guardarTiempo(jugadorActivo);
+            };
+            
 
             // mostrar opción para jugar otra vez o volver a inicio
             Swal.fire('🎉 Fin del Juego', `${respuestasJugadores[jugadorActivo].nombre} terminó con ${respuestasJugadores[jugadorActivo].puntaje} puntos`, 'success').then(() => {
