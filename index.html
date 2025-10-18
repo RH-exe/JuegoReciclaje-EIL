@@ -82,7 +82,7 @@
             area.puntaje = data[area.nombre];
         });
 
-        rederAreas();
+        blockArea();
       }catch(err){
         console.error("error al cargar el puntaje", err);
         blockArea();
@@ -95,6 +95,58 @@
     cargarPuntaje();
 
     window.addEventListener('load', ()=>{
+      Swal.fire({
+      title: "Ingresa su DNI",
+      input: "text",
+      inputAttributes: {
+        autocapitalize: "off"
+      },
+      showCancelButton: false,
+      confirmButtonText: "Ingresar",
+      showLoaderOnConfirm: false,
+      preConfirm: async (login) => {
+        try {
+          const response = await fetch("sources/buscar_DNI.php",{
+            method: "POST",
+            headers:{
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({DNI: login})
+          });
+
+          if (!response.ok) {
+            throw new Error("error con la conexion con el servidor");
+          }
+
+          if(login ===0 ){
+            Swal.fire({title: "ingresa su DNI", icon: "error"});
+          }
+
+          const data = await response.json();
+
+          if( data.length === 0){
+            Swal.showValidationMessage("DNI NO ENCONTRADO");
+          }
+          return data;
+
+        } catch (error) {
+          Swal.showValidationMessage(`ERROR ${error}`);
+        }
+      },
+      allowOutsideClick: () => !Swal.isLoading()
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          icon: "success",
+          title: "DNI encontrado",
+          text: `Se encontró el DNI: ${result.value[0].u_DNI} area: ${result.value[0].u_Area}`
+        });
+        window.location.href="index.html?area=" + encodeURIComponent(result.value[0].u_Area);
+        return ;
+      }
+    });
+      
+    /*  
       Swal.fire({toast: true, position: 'center', 
       html: `
       <div style="text-align: left; font-size: 20px; line-height: 1.6; max-height: 400px; overflow-y: auto; padding-right: 10px;">
@@ -145,7 +197,7 @@
       border-radius: 12px !important;
     }
   `;
-  document.head.appendChild(style);
+  document.head.appendChild(style);*/
     });
   </script>
 </body>

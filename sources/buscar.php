@@ -9,6 +9,7 @@ $stmt = $conexion->prepare($sql);
 $stmt->bindParam(":area", $area);
 $stmt->execute();
 
+
 $resultado = $stmt->fetchAll(PDO::FETCH_ASSOC);
 echo json_encode($resultado);
 
