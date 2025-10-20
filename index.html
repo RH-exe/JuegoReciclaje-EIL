@@ -1,112 +1,33 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Selección de Área</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    overflow: hidden; /* fuerza que nunca aparezca scroll */
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body class="bg-gray-100">
-
-  <!-- HEADER -->
-  <header class="bg-white border-b-8 border-lime-500 flex items-center ">
-    <img src="sources/imagess/logo-eil.png" alt="EIL" class="h-20 w-auto px-10 py-2 my-2 ">
-  </header>
-
-<main class="w-full bg-[url('sources/imagess/fondo.jpg')] bg-center bg-cover flex items-center justify-center overflow-hidden" style="height: calc(100vh - 96px); ">
-  <!-- Caja de contenido -->
-  <div class="bg-white/60 rounded-2xl shadow-lg p-8 w-[90%] max-w-6xl">
-    <h2 class="text-xl font-bold text-gray-800 mb-6 text-center uppercase">
-      Seleccione el área que pertenezca
-    </h2>
-
-    <!-- GRID DE BOTONES -->
-    <div id="contenedor" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 text-center">
-    </div>
-  </div>
-</main>
-  <!-- SCRIPT -->
-  <script>
-    const areas = [
-      {nombre : "Desorción", color:"bg-blue-900 text-white",  puntaje : 0},
-      {nombre : "T.I", color:"bg-lime-500 text-black",  puntaje : 0},
-      {nombre : "Fundición y refinación", color:"bg-blue-900 text-white",  puntaje : 0},
-      {nombre : "Administración", color:"bg-lime-500 text-black",  puntaje : 0},
-      {nombre : "Laboratorio quimico", color:"bg-blue-900 text-white",  puntaje : 0},
-      {nombre : "Laboratorio metalurgico", color:"bg-lime-500 text-black",  puntaje : 0},
-      {nombre : "Mantenimiento", color:"bg-blue-900 text-white",  puntaje : 0},
-      {nombre : "Ssoma", color:"bg-lime-500 text-black",  puntaje : 0},
-      {nombre : "Almacen", color:"bg-blue-900 text-white",  puntaje : 0} 
-    ];
-
-    const contenedor = document.getElementById("contenedor");
-
-    function blockArea (){
-      contenedor.innerHTML = "";
-      areas.forEach(area =>{          
-        const button = document.createElement("button");
-        button.className = `w-full h-16 cursor-pointer rounded-xl font-semibold text-xl shadow-md hover:scale-105 transition-transform flex flex-col justify-center ${area.color}`;
-        button.onclick = () => inicio(area.nombre);
-
-        const nombre = document.createElement("span");
-        nombre.textContent = area.nombre;
-
-        const puntaje = document.createElement("span");
-        puntaje.textContent = `Puntaje: ${area.puntaje ?? 0}`;
-        puntaje.className= 'text-red-600  text-xs'
-
-        button.appendChild(nombre);
-        button.appendChild(puntaje);
-        contenedor.appendChild(button);
-      })
-    };
-
-    async function cargarPuntaje() {
-      try{
-        const res = await fetch("sources/puntajeArea.php");
-        if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
-        const data = await res.json();
-
-        console.log("Datos recibidos:", data);
-
-        areas.forEach(area =>{
-            area.puntaje = data[area.nombre];
-        });
-
-        blockArea();
-      }catch(err){
-        console.error("error al cargar el puntaje", err);
-        blockArea();
-      }
-    }
-
-    function inicio(valor){
-      window.location.href="inicio.html?area=" + encodeURIComponent(valor);
-    }
-    cargarPuntaje();
-
-    window.addEventListener('load', ()=>{
+<body>
+    <script>
+      window.addEventListener('load', ()=>{
       Swal.fire({
       title: "Ingresa su DNI",
       input: "text",
       inputAttributes: {
         autocapitalize: "off"
       },
+      allowOutsideClick : false,
+      allowEscapeKey: false,
       showCancelButton: false,
       confirmButtonText: "Ingresar",
       showLoaderOnConfirm: false,
       preConfirm: async (login) => {
+        if (!login) {
+          Swal.showValidationMessage("Por favor ingresa tu DNI");
+          return false;
+        }
         try {
-          const response = await fetch("sources/buscar_DNI.php",{
+          const response = await fetch("sources/php/buscar_DNI.php",{
             method: "POST",
             headers:{
               "Content-Type": "application/json"
@@ -118,12 +39,8 @@
             throw new Error("error con la conexion con el servidor");
           }
 
-          if(login ===0 ){
-            Swal.fire({title: "ingresa su DNI", icon: "error"});
-          }
-
           const data = await response.json();
-
+          console.log("Respuesta del servidor:", data);
           if( data.length === 0){
             Swal.showValidationMessage("DNI NO ENCONTRADO");
           }
@@ -132,8 +49,7 @@
         } catch (error) {
           Swal.showValidationMessage(`ERROR ${error}`);
         }
-      },
-      allowOutsideClick: () => !Swal.isLoading()
+      },      
     }).then((result) => {
       if (result.isConfirmed) {
         Swal.fire({
@@ -141,64 +57,11 @@
           title: "DNI encontrado",
           text: `Se encontró el DNI: ${result.value[0].u_DNI} area: ${result.value[0].u_Area}`
         });
-        window.location.href="index.html?area=" + encodeURIComponent(result.value[0].u_Area);
+        window.location.href="areas.html?area=" + encodeURIComponent(result.value[0].u_Area);
         return ;
       }
     });
-      
-    /*  
-      Swal.fire({toast: true, position: 'center', 
-      html: `
-      <div style="text-align: left; font-size: 20px; line-height: 1.6; max-height: 400px; overflow-y: auto; padding-right: 10px;">
-        <p style="text-align: center"; font-size: 30px ><b>Reglas Oficiales del Desafío: "Misión Reciclaje"</b><p/>
-        <hr style="margin: 10px 0;">
-        <p><b>“Piensa, actúa y segrega”</b></p>
-        <p>“Cambia tus hábitos, cambia el mundo.”</p>
-        <p>“Haz la diferencia, segrega tus residuos.”</p>
-        <p>“Desafío ecológico: ¿reciclas o contaminas?”</p>
-        <p>“El futuro se recicla hoy.”</p>
-        <p>“¡Acepta el reto y salva el planeta!”</p>
-        <p>“Cada residuo tiene su lugar.”</p>
-        <hr style="margin: 10px 0;">
-        <p><b>🎯 Objetivo:</b> Fomentar el conocimiento sobre <b>GESTIÓN DE RESIDUOS SÓLIDOS</b> y la correcta <b>SEGREGACIÓN</b> de residuos de una manera divertida y colaborativa, promoviendo el trabajo en equipo y nuestro compromiso con la sostenibilidad.</p>
-        <hr style="margin: 10px 0;">
-        <p><b>📅 Fechas y Duración:</b> El desafío estará activo desde el <b>lunes 20 de octubre de 2025 a las 9:00 a.m.</b> hasta el <b>viernes 24 de octubre de 2025 a las 5:00 p.m.</b> Cada colaborador puede jugar una sola vez dentro de este período.</p>
-        <hr style="margin: 10px 0;">
-        <p><b>👥 Participación:</b> Abierta a todos los colaboradores de la empresa. Cada jugador representará el área al que pertenece formalmente.</p>
-        <p><b>🧩 Dinámica del Juego:</b> El juego consta de dos niveles con preguntas y desafíos sobre reciclaje. Las preguntas se mostrarán en orden aleatorio para cada participante. Incluye temas sobre <b>la segregación</b> de residuos.</p>
-        <p><b>🏅 Puntaje:</b> Cada respuesta correcta equivale a <b>1 punto</b>. En la segunda etapa, se restarán <b>0.35 puntos</b> por cada error, además de que la imagen será cambiada por otra opción.</p>
-        <p><b>⏱️ Cronometraje:</b> El cronómetro inicia automáticamente al comenzar el juego y se detiene al completar el último nivel. No se puede pausar.</p>
-        <p><b>📊 Sistema de Puntuación por Área:</b> El puntaje final de cada área será el <b>promedio</b> de los puntajes individuales obtenidos por sus miembros, garantizando una competencia equitativa.</p>
-        <p><b>⚖️ Criterio de Desempate:</b> En caso de empate, ganará el área con el menor tiempo promedio de completado.</p>
-        <p><b>🛠️ Juego Limpio y Soporte Técnico:</b>Se apela a la honestidad y al espíritu de aprendizaje individual. Si enfrentas un problema técnico que interrumpe tu juego (ej: la página se congela), no te preocupes. Reporta el incidente con una captura de pantalla al número <b>959 738 482</b> para recibir asistencia y poder reiniciar tu participación.</p>
-        <p><b>🏆 Anuncio de Ganadores y Reconocimiento:</b> Los resultados se anunciarán el <b>lunes 27 de octubre</b>. El área ganadora recibirá un reconocimiento especial. También se mencionará a los <b>3 mejores puntajes individuales</b> de toda la empresa.</p>
-        <hr style="margin: 10px 0;">
-        <p><b>¡Mucha suerte a todos y que gane el área con la mejor cultura de segregación y reciclaje!</b></p>
-      </div>`,
-      confirmButtonText: '¡Entendido!',
-      confirmButtonColor: '#16a34a',
-      allowOutsideClick: false,
-      width: 800,
-      customClass: {
-        confirmButton: 'custom-confirm-button',
-        popup: 'custom-popup'
-      }
-      });
-      const style = document.createElement('style');
-  style.innerHTML = `
-    .custom-popup {
-      display: flex !important;
-      flex-direction: column;
-      align-items: center;
-    }
-    .custom-confirm-button {
-      font-weight: bold !important;
-      padding: 16px 30px !important;
-      border-radius: 12px !important;
-    }
-  `;
-  document.head.appendChild(style);*/
-    });
-  </script>
+  });
+    </script>
 </body>
 </html>

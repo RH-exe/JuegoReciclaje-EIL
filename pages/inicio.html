@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Juego Reciclaje - Responsive</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-gradient-to-br from-gray-100 to-white min-h-screen text-gray-800">
+
+  <!-- Header -->
+  <header class="bg-lime-500 text-white shadow">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+      <div class="grid grid-cols-5 h-20 items-center">
+        <div class="col-star-2">
+          <p class="text-2xl font-semibold uppercase opacity-80 text-blue-900">Área</p>
+          <h1 id="bienvenida" class="text-lg font-bold">Bienvenido al sistema</h1>
+        </div>
+        
+        <div class="col-start-5">
+            <a href="index.html" class="end"><img src="../sources/imagess/logo_blanco.png" alt="Logo" class="h-20 w-auto object-contain"  /></a>         
+        </div>
+      </div>
+
+      <div class="flex items-center">
+        <!-- Toggle sidebar on small screens -->
+        <button id="togglePlayers" class="md:hidden inline-flex items-center gap-2 px-3 py-2 bg-white/10 rounded-md hover:bg-white/20">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 5h14a1 1 0 010 2H3a1 1 0 010-2zm0 4h14a1 1 0 010 2H3a1 1 0 010-2zm0 4h14a1 1 0 010 2H3a1 1 0 010-2z" clip-rule="evenodd" /></svg>
+          <span class="text-2xl">Jugadores</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main layout -->
+  <main class="max-w-[96%] mx-auto m-4 grid grid-cols-1 md:grid-cols-5 gap-4">
+
+    <!-- Sidebar / Players -->
+    <aside id="sidebar" class="md:col-span-1 bg-white rounded-lg p-4 shadow md:sticky md:top-6 z-10">
+      <div class="flex flex-col gap-3">
+        <div class="h-16 flex items-center justify-between">
+          <h2 class="font-semibold text-2xl uppercase">Jugadores</h2>
+          <span id="currentBadge" class="ml-4 text-sm text-gray-600 text-red-600 text-center"></span>          
+        </div>
+        <span id="lista" class=" block gap-3"></span>
+
+        <div class="mt-4 text-sm text-gray-600 italic">Selecciona un jugador para iniciar.</div>
+      </div>
+    </aside>
+
+    <!-- Game area -->
+    <section class="md:col-span-4 bg-white rounded-lg p-6 shadow">
+
+      <!-- Level indicator / controls -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+        <div>
+          <h2 id="tituloNivel" class="text-2xl font-bold">Nivel 1: Arrastre el nombre del contenedor al tacho correspondiente</h2>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="text-center">
+            <div class="text-xs text-gray-500">Jugador activo</div>
+            <div id="jugadorActivoDisplay" class="text-lg font-bold">—</div>
+          </div>
+          <button id="resetGame" class="px-3 py-2 bg-gray-100 border rounded-md text-sm">Reiniciar sesión</button>
+        </div>
+      </div>
+
+      <!-- Nivel 1 -->
+      <div id="nivel1" class="space-y-4">
+        <div id="ContenedorNombreTacho" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+        <div id="TituloNivel1"></div>
+        <div id="ContenedorTacho" class="grid grid-cols-4 gap-4"></div>     
+        
+      </div>
+
+      <!-- Nivel 2 (oculto al inicio) -->
+      <div id="nivel2" class="hidden space-y-4">
+        <h3 class="text-lg font-semibold">Nivel 2: Arrastra o toca para clasificar</h3>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Items a reciclar -->
+          <div>
+            <h4 class="font-semibold mb-2">Residuos</h4>
+            <div id="itemsReciclar" class="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3 bg-gray-50 rounded h-64 overflow-auto"></div>
+          </div>
+
+          <!-- TachOS destino (ocultar en pantallas muy pequeñas con scroll horizontal) -->
+          <div class="lg:col-span-2">
+            <h4 class="font-semibold mb-2">Tachos</h4>
+            <div id="contenedorNivel2" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 p-3 bg-gray-50 rounded min-h-[220px]"></div>
+          </div>
+        </div>
+        <div id="botonNivel2" class="justify-end flex gap-4">
+          <input type="button" value= "Terminar Juego" class="cursor-pointer w-[8rem] h-12 rounded-lg bg-lime-600 text-white ">
+          <input type="button" value= "Siguiente Jugador" class="cursor-pointer w-[10rem] h-12 rounded-lg bg-lime-600 text-white ">
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const Usuario_area = params.get('userarea');
+  const bienvenida = document.getElementById('bienvenida');
+
+  if (Usuario_area) {
+    bienvenida.textContent = Usuario_area;
+  }
+
+  const tachos = [
+    {id:1, color:'azul', nombre:'Papel y carton', image:'../sources/imagess/tacho_azul.jpg', puntos:1},
+    {id:2, color:'verde', nombre:'RAEE', image:'../sources/imagess/tacho_verde.jpg', puntos:1},
+    {id:3, color:'plomo', nombre:'Vidrio', image:'../sources/imagess/tacho_plomo.jpg', puntos:1},
+    {id:4, color:'blanco', nombre:'Plastico', image:'../sources/imagess/tacho_blanco.jpg', puntos:1},
+    {id:5, color:'naranja', nombre:'Organicos', image:'../sources/imagess/Tachos01_Mesa de trabajo 1 copia 8.jpg', puntos:1},
+    {id:6, color:'negro', nombre:'No aprovechables', image:'../sources/imagess/tacho_negro.jpg', puntos:1},
+    {id:7, color:'rojo', nombre:'Residuos peligrosos', image:'../sources/imagess/tacho_rojo.jpg', puntos:1},
+    {id:8, color:'amarillo', nombre:'Metales', image:'../sources/imagess/tacho_amarillo.jpg', puntos:1}
+  ];
+
+  const nombreTachos = [
+    {nombre: "Papel y carton"},
+    {nombre: "RAEE"},
+    {nombre: "Vidrio"},
+    {nombre: "Plastico"},
+    {nombre: "Organicos"},
+    {nombre: "No aprovechables"},
+    {nombre: "Residuos peligrosos"},
+    {nombre: "Metales"}
+  ];
+
+  const nombreTachosAleatorios = [...nombreTachos].sort(() => Math.random() - 0.5);
+
+  const residuos =[ 
+    {id: 1, nombre:"Lata de metal", imagen : "../sources/imagess/metal-lata.jpg", tacho: "amarillo"},
+    {id: 2, nombre:"Recogedor de metal", imagen : "../sources/imagess/metal-recogedor.jpg", tacho: "amarillo"}, 
+    {id: 3, nombre:"Tornillos de metal", imagen : "../sources/imagess/metal-tornillos.jpeg", tacho: "amarillo"}, 
+    {id: 4, nombre:"Caja de papel", imagen : "../sources/imagess/papel-caja.jpg", tacho: "azul"}, 
+    {id: 5, nombre:"Cuaderno", imagen : "../sources/imagess/papel-cuaderno.jpg", tacho: "azul"}, 
+    {id: 6, nombre:"Hoja Bond", imagen : "../sources/imagess/papel-hoja bond.jpg", tacho: "azul"}, 
+    {id: 7, nombre:"Periodico", imagen : "../sources/imagess/papel-periodico.jpg", tacho: "azul"}, 
+    {id: 8, nombre:"Revista", imagen : "../sources/imagess/papel-revista.jpeg", tacho: "azul"},
+    {id: 9, nombre:"Sobremanila", imagen : "../sources/imagess/papel-sobremanila.jpg", tacho: "azul"}, 
+    {id: 10, nombre:"Botella de plastico", imagen : "../ources/imagess/plastico- botellas.jpg", tacho: "blanco"}, 
+    {id: 11, nombre:"Bolsa de plastico", imagen : "../sources/imagess/plastico-bolsa.webp", tacho: "blanco"}, 
+    {id: 12, nombre:"Botella de Yogurt", imagen : "../sources/imagess/plastico-botella yogur.webp", tacho: "blanco"}, 
+    {id: 13, nombre:"Film", imagen : "../sources/imagess/plastico-film.jpg", tacho: "blanco"}, 
+    {id: 14, nombre:"Taper de plastico", imagen : "../sources/imagess/plastico-taper.webp", tacho: "blanco"}, 
+    {id: 15, nombre:"Aerosol", imagen : "../sources/imagess/AEROSOL PELIGROSO.jpg", tacho: "rojo"}, 
+    {id: 16, nombre:"Arerpe", imagen : "../sources/imagess/ARERPE PELIGRPP.jpg", tacho: "rojo"}, 
+    {id: 17, nombre:"Botella de Vidrio", imagen : "../sources/imagess/BOTELLA VIDRIO.jpg", tacho: "plomo"}, 
+    {id: 18, nombre:"Cables", imagen : "../sources/imagess/CABLES METAL.jpg", tacho: "amarillo"}, 
+    {id: 19, nombre:"Caja Sucia", imagen : "../sources/imagess/CAJA SUCIA GENERALES.jpg", tacho: "negro"}, 
+    {id: 20, nombre:"Celular", imagen : "../sources/imagess/CELULAR RAEE.jpg", tacho: "verde"}, 
+    {id: 21, nombre:"Cepillo", imagen : "../sources/imagess/CEPILLO GENERALES.jpg", tacho: "negro"}, 
+    {id: 22, nombre:"Cigarillo", imagen : "../sources/imagess/CIGARRILLO GENERALES.jpg", tacho: "negro"}, 
+    {id: 23, nombre:"Clavos", imagen : "../sources/imagess/CLAVOS METAL.jpg", tacho: "amarillo"}, 
+    {id: 24, nombre:"Espejo", imagen : "../sources/imagess/ESPEJO VIDRIO.jpg", tacho: "plomo"}, 
+    {id: 25, nombre:"Papel", imagen : "../sources/imagess/GENERALES PAPEL.jpg", tacho: "negro"}, 
+    {id: 26, nombre:"Tecnopor", imagen : "../sources/imagess/GENERALES TENCOPOR.webpjpg", tacho: "negro"}, 
+    {id: 27, nombre:"Hojas", imagen : "../sources/imagess/HOJAS ORGANICO.jpg", tacho: "naranja"}, 
+    {id: 28, nombre:"Impresor", imagen : "../sources/imagess/IMPRESOR RAEE.jpg", tacho: "verde"}, 
+    {id: 29, nombre:"Jeringas", imagen : "../sources/imagess/JERINGAS PELIGROSO.jpg", tacho: "negro"}, 
+    {id: 30, nombre:"Laboratorio", imagen : "../sources/imagess/LABORATORIO VIDRIO.jpg", tacho: "plomo"}, 
+    {id: 31, nombre:"Latas", imagen : "../sources/imagess/LATAS METAL.jpg", tacho: "amarillo"}, 
+    {id: 32, nombre:"Latas", imagen : "../sources/imagess/LATAS PELIGROSOSO.jpg", tacho: "rojo"}, 
+    {id: 33, nombre:"Luna", imagen : "../sources/imagess/LUNA VIDRIO.png", tacho: "plomo"} 
+  ];
+
+  const residuosAleatorios = [...residuos].sort(() => Math.random() - 0.5).slice(0,12);
+
+  // ---------------------------
+  // DOM references
+  // ---------------------------
+  const listaJugador = document.getElementById('lista');
+  const jugadorActivoDisplay = document.getElementById('jugadorActivoDisplay');
+  const currentBadge = document.getElementById('currentBadge');
+
+
+  const respuestasJugadores = {};
+  let jugadorActivo = null;
+  let contadorInterval = null;
+  let contadorSegundos = 0;
+
+
+  function crearBotonJugador(id, nombre, puntaje = 0, disabled = false, finished = false) {
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.dataset.jugador = String(id);
+    btn.className = "flex justify-between items-center px-3 py-2 rounded-md text-sm w-full gap-2 mb-2 border border-gray-200";
+    if (disabled) {
+      btn.disabled = true;
+      btn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+    if (finished) {
+      btn.dataset.finished = "true";
+      btn.classList.add('bg-gray-100');
+    }
+
+    const left = document.createElement('span');
+    left.textContent = nombre;
+    left.className = 'truncate';
+
+    const right = document.createElement('span');
+    right.className = 'ml-2 font-semibold text-sm';
+    right.textContent = puntaje;
+
+    btn.appendChild(left);
+    btn.appendChild(right);
+
+    return btn;
+  }
+
+  function updatePlayerUI(id) {
+    const li = [...listaJugador.children].find(ch => ch.dataset && ch.dataset.jugador === String(id));
+    if (!li) return;
+    const data = respuestasJugadores[String(id)];
+    li.childNodes[0].textContent = data.nombre;
+    li.childNodes[1].textContent = data.puntaje;
+  }
+
+  function disablePlayer(id) {
+    [...listaJugador.children].forEach(ch => {
+      if (ch.dataset.jugador === String(id)) {
+        ch.disabled = true;
+        ch.dataset.finished = "true";
+        ch.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-100');
+      } else {
+        // habilitar los otros
+        ch.disabled = false;
+        ch.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-100');
+      }
+    });
+  }
+
+  function enableAllPlayers() {
+    [...listaJugador.children].forEach(btn => {
+      if (btn.dataset.finished === "true") {
+        btn.disabled = true;
+        btn.classList.add('opacity-50','bg-gray-100');
+      } else {
+        btn.disabled = false;
+        btn.classList.remove('opacity-50','bg-gray-100','cursor-not-allowed');
+      }
+    });
+  }
+
+  // ---------------------------
+  // Fetch players from server and build UI
+  // ---------------------------
+  function cargarJugadores() {
+    fetch(`../sources/php/buscar.php?area=${encodeURIComponent(Usuario_area)}`)
+      .then(res => res.json())
+      .then(data => {
+        listaJugador.innerHTML = ''; 
+        data.forEach(j => {
+          // inicializar datos en memoria
+          respuestasJugadores[String(j.u_idUsuario)] = {
+            nombre: j.u_nombre,
+            puntaje: 0,
+            respondidos: {},
+            finished: false
+          };
+
+          const btn = crearBotonJugador(j.u_idUsuario, j.u_nombre, 0, false, false);
+
+          btn.addEventListener('click', () => {
+            // si el jugador ya terminó, no permitir seleccionarlo
+            if (btn.dataset.finished === "true") {
+              Swal.fire('Este jugador ya jugó', '', 'info');
+              return;
+            }
+
+            setJugadorActivo(String(j.u_idUsuario));
+            // desactivar todos excepto el seleccionado
+            [...listaJugador.children].forEach(b => {
+              b.disabled = true;
+              b.classList.add('opacity-50', 'cursor-not-allowed');
+            });
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            btn.classList.add('bg-lime-100');
+          });
+
+          listaJugador.appendChild(btn);
+        });
+      })
+      .catch(err => console.error('Error cargando jugadores:', err));
+  }
+
+  cargarJugadores();
+
+  // ---------------------------
+  // setJugadorActivo (solo muestra nombre en el display)
+  // ---------------------------
+  function setJugadorActivo(id) {
+    if (!respuestasJugadores[String(id)]) {
+      console.warn('Jugador no encontrado', id);
+      return;
+    }
+
+    jugadorActivo = String(id);
+
+    // Reiniciar contador
+    if (contadorInterval) {
+      clearInterval(contadorInterval);
+      contadorInterval = null;
+    }
+    contadorSegundos = 0;
+
+    // actualizar UI de lista (resaltar)
+    [...listaJugador.querySelectorAll('button')].forEach(btn => {
+      btn.classList.toggle('ring-2', btn.dataset.jugador === jugadorActivo);
+    });
+
+    // mostrar SOLO el NOMBRE en jugadorActivoDisplay
+    const data = respuestasJugadores[jugadorActivo];
+    jugadorActivoDisplay.textContent = data ? data.nombre : '—';
+
+    // mostrar puntaje actual en badge
+    //currentBadge.textContent = `tiempo: ${data ? data.puntaje : 0}`;
+
+    // iniciar contador (opcional)
+    contadorInterval = setInterval(() => {
+      contadorSegundos++;
+      const minutos = Math.floor(contadorSegundos / 60);
+      const resto = contadorSegundos % 60;
+      // no mostramos aquí puntaje, sino tiempo (si lo deseas)
+      currentBadge.textContent = `Tiempo: ${minutos}m ${resto}s`;
+      // mantendremos solo puntaje visible, y puedes guardar tiempo con guardarTiempo()
+    }, 1000);
+  }
+
+  // ---------------------------
+  // Guardar puntaje (backend) - unchanged
+  // ---------------------------
+  function guardarPuntaje(jugadorActivoParam, puntaje) {
+    return fetch('../sources/php/guardar_puntaje.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ usuario_id: jugadorActivoParam, puntaje: puntaje })
+    })
+    .then(async res => {
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch {
+        console.error("respuesta no es un JSON", text);
+        throw new Error("respuesta no valida del servidor");
+      }
+    })
+    .then(data => {
+      if (data.status === 'ok') {
+        //console.log('Puntaje guardado');
+      } else {
+        console.error('Error al guardar:', data.msg);
+      }
+    })
+    .catch(err => console.error('Error enviando puntaje:', err));
+  }
+
+  function guardarTiempo(jugadorActivoParam) {
+    const tiempoTexto = currentBadge.textContent.trim();
+    // No cambiamos parseo aqui (lo tenías definido)
+    const match = tiempoTexto.match(/(?:(\d+)m)?\s*(\d+)s/);
+    let minutos = 0, segundos = 0;
+    if (match) {
+      minutos = parseInt(match[1] || 0);
+      segundos = parseInt(match[2] || 0);
+    }
+    const totalSegundos = minutos * 60 + segundos;
+    return fetch('../sources/php/guardarTiempo.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        usuario_id: jugadorActivoParam,
+        tiempo: totalSegundos
+      })
+    })
+    .then(async res => {
+      const text = await res.text();
+      try { return JSON.parse(text); } catch { console.error("Respuesta no es JSON:", text); throw new Error("Respuesta no válida"); }
+    })
+    .then(data => {
+      if (data.status === 'success') console.log(`Tiempo guardado`);
+      else console.error('⚠️ Error al guardar tiempo:', data.msg);
+    })
+    .catch(err => console.error('Error enviando tiempo:', err));
+  }
+
+  // ---------------------------
+  // Nivel 1
+  // ---------------------------
+  function iniciarNivel1() {
+    const contenedorTacho = document.getElementById('ContenedorTacho');
+    const contenedorNombre = document.getElementById('ContenedorNombreTacho');
+    contenedorTacho.innerHTML = '';
+    contenedorNombre.innerHTML = '';
+
+    // Genera tarjetas con nombres (aleatorios)
+    nombreTachosAleatorios.forEach(tachoNombre => {
+      const card = document.createElement('div');
+      card.className = 'flex flex-col items-center border p-3 rounded-lg shadow-sm bg-white cursor-pointer hover:bg-gray-100 hover:border-black';
+      card.dataset.nombretacho = tachoNombre.nombre;
+
+      const nombre = document.createElement('p');
+      nombre.textContent = tachoNombre.nombre;
+      nombre.className = 'text-xl';
+
+      card.appendChild(nombre);
+      contenedorNombre.appendChild(card);
+
+      card.draggable = true;
+      card.addEventListener('dragstart', e => {
+        e.dataTransfer.setData('nombreTacho', tachoNombre.nombre);
+      });
+    });
+
+    // Título
+    const titulo = document.getElementById('TituloNivel1');
+    titulo.innerHTML = '';
+    const textTitulo = document.createElement('p');
+    textTitulo.textContent = 'Contenedores de reciclaje';
+    textTitulo.className = 'text-2xl font-bold uppercase';
+    titulo.appendChild(textTitulo);
+
+    // Genera tachos
+    tachos.forEach(tacho => {
+      const card = document.createElement('div');
+      card.className = 'flex flex-col items-center border p-3 rounded-lg shadow-sm bg-white';
+
+      const img = document.createElement('img');
+      img.src = tacho.image;
+      img.alt = tacho.nombre;
+      img.className = "w-[9rem] object-cover rounded mb-2";
+
+      card.appendChild(img);
+      contenedorTacho.appendChild(card);
+
+      // Drop permitido
+      card.addEventListener('dragover', (e) => e.preventDefault());
+
+      // Lógica cuando sueltas un nombre
+      card.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const nombreID = e.dataTransfer.getData('nombreTacho');
+        handleDropNombre(nombreID, tacho);
+      });
+    });
+
+    // handler del drop (nivel1)
+    function handleDropNombre(nombretacho, tacho) {
+      const nombreObj = nombreTachos.find(n => n.nombre === nombretacho);
+
+      if (!jugadorActivo) {
+        Swal.fire('Atención', 'Debe seleccionar un jugador antes de jugar', 'warning');
+        return;
+      }
+
+      const jugadorData = respuestasJugadores[jugadorActivo];
+      if (!jugadorData) {
+        console.warn('Jugador activo no encontrado', jugadorActivo);
+        return;
+      }
+
+      if (nombreObj && nombreObj.nombre === tacho.nombre) {
+        // acierto
+        jugadorData.puntaje += 1;
+        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: `${nombreObj.nombre} va en ${tacho.color}`, showConfirmButton: false, timer: 900 });
+
+        // actualizar UI y backend opcionalmente
+        updatePlayerUI(jugadorActivo);
+        currentBadge.textContent = `Puntos: ${jugadorData.puntaje}`;
+        guardarPuntaje(jugadorActivo, jugadorData.puntaje);
+      } else {
+        // error visual
+        const elemErr = document.querySelector(`[data-nombretacho="${nombretacho}"]`);
+        if (elemErr) {
+          elemErr.classList.add('bg-red-600');
+          setTimeout(() => elemErr.classList.remove('bg-red-600'), 1000);
+        }
+      }
+
+      // eliminar nombre si acierto
+      const elem = document.querySelector(`[data-nombretacho="${nombretacho}"]`);
+      if (elem && nombreObj && nombreObj.nombre === tacho.nombre) elem.remove();
+
+      // comprobar fin de nivel 1
+      if (contenedorNombre.children.length === 0) {
+        Swal.fire('Nivel 1 TERMINADO', `${jugadorData.nombre} terminó con ${jugadorData.puntaje} puntos`, 'success').then(() => {
+          // deshabilitar jugador que ya jugó, habilitar otros
+          disablePlayer(jugadorActivo);
+          // guardar puntaje y pasar a nivel 2
+          guardarPuntaje(jugadorActivo, jugadorData.puntaje).then(() => {
+            document.getElementById('nivel1').classList.add('hidden');
+            document.getElementById('nivel2').classList.remove('hidden');
+            iniciarNivel2();
+          });
+        });
+      }
+    }
+  }
+
+  // ---------------------------
+  // Nivel 2 (drag & touch friendly)
+  // ---------------------------
+  const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+
+  function iniciarNivel2() {
+    const botonNivel2 = document.getElementById("botonNivel2");
+    const itemsReciclar = document.getElementById('itemsReciclar');
+    const contenedorNivel2 = document.getElementById('contenedorNivel2');
+    itemsReciclar.innerHTML = '';
+    contenedorNivel2.innerHTML = '';
+
+    // crear residuos
+    residuosAleatorios.forEach(residuo => {
+      const card = document.createElement('div');
+      card.className = 'flex flex-col items-center p-2 bg-white rounded shadow cursor-move';
+      card.draggable = true;
+      card.dataset.residuoId = residuo.id;
+      card.setAttribute('role', 'button');
+
+      const img = document.createElement('img');
+      img.src = residuo.imagen;
+      img.alt = residuo.nombre;
+      img.className = 'w-20 h-20 object-contain mb-1';
+
+      const span = document.createElement('span');
+      span.textContent = residuo.nombre;
+      span.className = 'text-sm text-center';
+
+      card.appendChild(img);
+      card.appendChild(span);
+      itemsReciclar.appendChild(card);
+
+      if (!isTouch) {
+        card.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('residuoId', residuo.id);
+        });
+      } else {
+        // touch fallback selection (no cambiar)
+      }
+    });
+
+    // crear tachos como zonas drop
+    tachos.forEach(tacho => {
+      const card = document.createElement('div');
+      card.className = 'flex flex-col items-center p-3 bg-white rounded shadow text-center';
+      card.dataset.tachoColor = tacho.color;
+      card.dataset.tachoId = tacho.id;
+      card.setAttribute('aria-label', tacho.nombre);
+
+      const img = document.createElement('img');
+      img.src = tacho.image;
+      img.alt = tacho.nombre;
+      img.className = 'w-24 h-24 object-cover mb-1 rounded';
+
+      const span = document.createElement('span');
+      span.textContent = tacho.nombre;
+      span.className = 'text-sm';
+
+      card.appendChild(img);
+      card.appendChild(span);
+      contenedorNivel2.appendChild(card);
+
+      // handlers for drop
+      card.addEventListener('dragover', (e) => e.preventDefault());
+      card.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const residuoId = e.dataTransfer.getData('residuoId');
+        handleDrop(String(residuoId), tacho);
+      });
+
+      // touch fallback: tap a tacho to drop selectedResiduo (if implemented)
+    });
+
+    // selectedResiduo used on touch devices (optional)
+    let selectedResiduo = null;
+
+    function handleDrop(residuoId, tacho) {
+      const residuo = residuos.find(r => String(r.id) === String(residuoId));
+      if (!residuo) return;
+
+      if (!jugadorActivo) {
+        Swal.fire('Atención', 'Debe seleccionar un jugador antes de jugar', 'warning');
+        return;
+      }
+
+      const jugadorData = respuestasJugadores[jugadorActivo];
+      if (!jugadorData) return;
+
+      if (residuo.tacho === tacho.color) {
+        jugadorData.puntaje += 1;
+        Swal.fire({ toast:true, position:'top-end', icon:'success', title:`${residuo.nombre} va en ${tacho.nombre}`, showConfirmButton:false, timer:900 });
+      } else {
+        Swal.fire({ toast:true, position:'top-end', icon:'error', title:`${residuo.nombre} no va en ${tacho.nombre}`, showConfirmButton:false, timer:900 });
+        // restar decimales con precaución
+        jugadorData.puntaje = parseFloat((jugadorData.puntaje - 0.35).toFixed(2));
+      }
+
+      // actualizar UI puntaje
+      updatePlayerUI(jugadorActivo);
+      currentBadge.textContent = `Puntos: ${jugadorData.puntaje}`;
+
+      // remover residuo del DOM
+      const elem = document.querySelector(`[data-residuo-id="${residuoId}"]`);
+      if (elem) elem.remove();
+
+      // si ya no quedan residuos, terminar el turno
+      if (itemsReciclar.children.length === 0) {
+        // guardar puntaje y tiempo
+        guardarPuntaje(jugadorActivo, jugadorData.puntaje);
+        guardarTiempo(jugadorActivo);
+
+        Swal.fire('🎉 Fin del turno', `${jugadorData.nombre} terminó con ${jugadorData.puntaje} puntos`, 'success').then(() => {
+          // marcar jugador como finalizado y deshabilitar solo a él; habilitar otros
+          disablePlayer(jugadorActivo);
+          // limpiar UI y volver a nivel1 para siguiente jugador
+          //document.getElementById('nivel2').classList.add('hidden');
+          //document.getElementById('nivel1').classList.remove('hidden');
+          // reset jugador activo y display
+          jugadorActivo = null;
+          jugadorActivoDisplay.textContent = '—';
+          currentBadge.textContent = '';
+          // reiniciar nombres para próximo jugador
+          iniciarNivel1();
+        });
+      }
+    }
+  }
+
+  // ---------------------------
+  // UI helpers (toggle players, reset)
+  // ---------------------------
+  document.getElementById('togglePlayers').addEventListener('click', () => {
+    const sb = document.getElementById('sidebar');
+    sb.classList.toggle('hidden');
+  });
+
+  document.getElementById('resetGame').addEventListener('click', () => {
+    // reinicia todo (estado local)
+    Object.keys(respuestasJugadores).forEach(k => {
+      respuestasJugadores[k].puntaje = 0;
+      respuestasJugadores[k].respondidos = {};
+      respuestasJugadores[k].finished = false;
+    });
+
+    // reconstruir UI de la lista (manteniendo nombres)
+    [...listaJugador.children].forEach(btn => {
+      const id = btn.dataset.jugador;
+      const data = respuestasJugadores[id];
+      if (data) {
+        btn.childNodes[0].textContent = data.nombre;
+        btn.childNodes[1].textContent = data.puntaje;
+        btn.disabled = false;
+        btn.dataset.finished = "false";
+        btn.classList.remove('opacity-50','bg-gray-100','cursor-not-allowed');
+      }
+    });
+
+    currentBadge.textContent = '';
+    jugadorActivo = null;
+    jugadorActivoDisplay.textContent = '—';
+    document.getElementById('nivel2').classList.add('hidden');
+    document.getElementById('nivel1').classList.remove('hidden');
+    iniciarNivel1();
+  });
+
+  // inicializar
+  window.addEventListener('load', () => {
+    document.getElementById('nivel1').classList.remove('hidden');
+    iniciarNivel1();
+  });
+</script>
+
+</body>
+</html>

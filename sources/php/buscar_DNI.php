@@ -3,7 +3,6 @@
  require_once "conexion.php";
 
  $data= json_decode(file_get_contents("php://input"),true);
- $usuario_id = $data["usuario_id"] ?? '';
  $dni = $data["DNI"] ?? '';
 
  if(empty($dni)){
