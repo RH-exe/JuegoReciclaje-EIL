@@ -517,6 +517,16 @@
     itemsReciclar.innerHTML = '';
     contenedorNivel2.innerHTML = '';
 
+    function disabledboton(){
+      const botones = botonNivel2.querySelectorAll('input');
+      botones.forEach( bt=>{
+        bt.disabled =true;
+        bt.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-100');
+      })
+    }
+
+    disabledboton();
+
     // crear residuos
     residuosAleatorios.forEach(residuo => {
       const card = document.createElement('div');
