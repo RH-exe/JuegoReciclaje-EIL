@@ -10,56 +10,49 @@
 <body>
     <script>
       window.addEventListener('load', ()=>{
-      Swal.fire({
-      title: "Ingresa su DNI",
-      input: "text",
-      inputAttributes: {
-        autocapitalize: "off"
-      },
-      allowOutsideClick : false,
-      allowEscapeKey: false,
-      showCancelButton: false,
-      confirmButtonText: "Ingresar",
-      showLoaderOnConfirm: false,
-      preConfirm: async (login) => {
-        if (!login) {
-          Swal.showValidationMessage("Por favor ingresa tu DNI");
-          return false;
-        }
-        try {
-          const response = await fetch("sources/php/buscar_DNI.php",{
-            method: "POST",
-            headers:{
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({DNI: login})
-          });
+        Swal.fire({
+          title: "Ingresa su DNI",
+          input: "text",
+          inputAttributes: {
+            autocapitalize: "off"
+          },
+          allowOutsideClick : false,
+          allowEscapeKey: false,
+          showCancelButton: false,
+          confirmButtonText: "Ingresar",
+          showLoaderOnConfirm: false,
+          preConfirm: async (login) => {
+            if (!login) {
+              Swal.showValidationMessage("Por favor ingresa tu DNI");
+              return false;
+            }
+            try {
+              const response = await fetch("sources/php/buscar_DNI.php",{
+                method: "POST",
+                headers:{
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({DNI: login})
+              });
 
-          if (!response.ok) {
-            throw new Error("error con la conexion con el servidor");
-          }
+              if (!response.ok) {
+                throw new Error("error con la conexion con el servidor");
+              }
 
-          const data = await response.json();
-          console.log("Respuesta del servidor:", data);
-          if( data.length === 0){
-            Swal.showValidationMessage("DNI NO ENCONTRADO");
-          }
-          return data;
+              const data = await response.json();
+              console.log("Respuesta del servidor:", data);
+              if( data.length === 0){
+                Swal.showValidationMessage("DNI NO ENCONTRADO");
+              }
+              return data;
 
-        } catch (error) {
-          Swal.showValidationMessage(`ERROR ${error}`);
-        }
+            } catch (error) {
+              Swal.showValidationMessage(`ERROR ${error}`);
+            }
       },      
     }).then((result) => {
-      if (result.isConfirmed) {
-        Swal.fire({
-          icon: "success",
-          title: "DNI encontrado",
-          text: `Se encontró el DNI: ${result.value[0].u_DNI} area: ${result.value[0].u_Area}`
-        });
-        window.location.href="areas.html?area=" + encodeURIComponent(result.value[0].u_Area);
-        return ;
-      }
+        window.location.href="pages/inicio.html?area=" + encodeURIComponent(result.value[0].u_Area) + "&dni=" +encodeURIComponent(result.value[0].u_DNI);
+        return ;      
     });
   });
     </script>

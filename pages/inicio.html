@@ -19,7 +19,7 @@
         </div>
         
         <div class="col-start-5">
-            <a href="index.html" class="end"><img src="../sources/imagess/logo_blanco.png" alt="Logo" class="h-20 w-auto object-contain"  /></a>         
+            <a href="../index.html" class="end"><img src="../sources/imagess/logo_blanco.png" alt="Logo" class="h-20 w-auto object-contain"  /></a>         
         </div>
       </div>
 
@@ -55,7 +55,7 @@
       <!-- Level indicator / controls -->
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
-          <h2 id="tituloNivel" class="text-2xl font-bold">Nivel 1: Arrastre el nombre del contenedor al tacho correspondiente</h2>
+          <h2 id="tituloNivel" class="text-4xl font-bold uppercase text-lime-400">juego de reciclaje "EIL"</h2>
         </div>
         <div class="flex items-center gap-2">
           <div class="text-center">
@@ -68,6 +68,7 @@
 
       <!-- Nivel 1 -->
       <div id="nivel1" class="space-y-4">
+        <h3 class="text-lg font-semibold">Nivel 1: Arrastre los nombres al contenedor correspondiente</h3>
         <div id="ContenedorNombreTacho" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
         <div id="TituloNivel1"></div>
         <div id="ContenedorTacho" class="grid grid-cols-4 gap-4"></div>     
@@ -93,7 +94,7 @@
         </div>
         <div id="botonNivel2" class="justify-end flex gap-4">
           <input type="button" value= "Terminar Juego" class="cursor-pointer w-[8rem] h-12 rounded-lg bg-lime-600 text-white ">
-          <input type="button" value= "Siguiente Jugador" class="cursor-pointer w-[10rem] h-12 rounded-lg bg-lime-600 text-white ">
+          <input id="btnSiguienteJugador" type="button" value= "Siguiente Jugador" class="cursor-pointer w-[10rem] h-12 rounded-lg bg-lime-600 text-white ">
         </div>
       </div>
 
@@ -103,7 +104,8 @@
 
 <script>
   const params = new URLSearchParams(window.location.search);
-  const Usuario_area = params.get('userarea');
+  const Usuario_area = params.get('area');
+  const usuario_DNI = params.get('dni');
   const bienvenida = document.getElementById('bienvenida');
 
   if (Usuario_area) {
@@ -144,7 +146,7 @@
     {id: 7, nombre:"Periodico", imagen : "../sources/imagess/papel-periodico.jpg", tacho: "azul"}, 
     {id: 8, nombre:"Revista", imagen : "../sources/imagess/papel-revista.jpeg", tacho: "azul"},
     {id: 9, nombre:"Sobremanila", imagen : "../sources/imagess/papel-sobremanila.jpg", tacho: "azul"}, 
-    {id: 10, nombre:"Botella de plastico", imagen : "../ources/imagess/plastico- botellas.jpg", tacho: "blanco"}, 
+    {id: 10, nombre:"Botella de plastico", imagen : "../sources/imagess/plastico- botellas.jpg", tacho: "blanco"}, 
     {id: 11, nombre:"Bolsa de plastico", imagen : "../sources/imagess/plastico-bolsa.webp", tacho: "blanco"}, 
     {id: 12, nombre:"Botella de Yogurt", imagen : "../sources/imagess/plastico-botella yogur.webp", tacho: "blanco"}, 
     {id: 13, nombre:"Film", imagen : "../sources/imagess/plastico-film.jpg", tacho: "blanco"}, 
@@ -258,7 +260,6 @@
       .then(data => {
         listaJugador.innerHTML = ''; 
         data.forEach(j => {
-          // inicializar datos en memoria
           respuestasJugadores[String(j.u_idUsuario)] = {
             nombre: j.u_nombre,
             puntaje: 0,
@@ -267,27 +268,29 @@
           };
 
           const btn = crearBotonJugador(j.u_idUsuario, j.u_nombre, 0, false, false);
+          listaJugador.appendChild(btn);
+        });
 
-          btn.addEventListener('click', () => {
-            // si el jugador ya terminó, no permitir seleccionarlo
-            if (btn.dataset.finished === "true") {
-              Swal.fire('Este jugador ya jugó', '', 'info');
-              return;
-            }
+        if(usuario_DNI){
+          const jugadorEncontrado = data.find(j => j.u_DNI === usuario_DNI);
+          if(jugadorEncontrado){
+            const btnJugador = [...listaJugador.children].find(
+              b=> b.dataset.jugador === String(jugadorEncontrado.u_idUsuario)
+            );
+            setJugadorActivo(String(jugadorEncontrado.u_idUsuario));
 
-            setJugadorActivo(String(j.u_idUsuario));
-            // desactivar todos excepto el seleccionado
             [...listaJugador.children].forEach(b => {
               b.disabled = true;
               b.classList.add('opacity-50', 'cursor-not-allowed');
             });
-            btn.disabled = false;
-            btn.classList.remove('opacity-50', 'cursor-not-allowed');
-            btn.classList.add('bg-lime-100');
-          });
 
-          listaJugador.appendChild(btn);
-        });
+            if (btnJugador) {
+              btnJugador.disabled = false;
+              btnJugador.classList.remove('opacity-50', 'cursor-not-allowed');
+              btnJugador.classList.add('bg-lime-100');
+            }      
+          }
+        }
       })
       .catch(err => console.error('Error cargando jugadores:', err));
   }
@@ -321,8 +324,7 @@
     const data = respuestasJugadores[jugadorActivo];
     jugadorActivoDisplay.textContent = data ? data.nombre : '—';
 
-    // mostrar puntaje actual en badge
-    //currentBadge.textContent = `tiempo: ${data ? data.puntaje : 0}`;
+
 
     // iniciar contador (opcional)
     contadorInterval = setInterval(() => {
@@ -425,7 +427,7 @@
     titulo.innerHTML = '';
     const textTitulo = document.createElement('p');
     textTitulo.textContent = 'Contenedores de reciclaje';
-    textTitulo.className = 'text-2xl font-bold uppercase';
+    textTitulo.className = 'text-lg font-semibold ';
     titulo.appendChild(textTitulo);
 
     // Genera tachos
@@ -505,144 +507,219 @@
     }
   }
 
+  
+
   // ---------------------------
   // Nivel 2 (drag & touch friendly)
   // ---------------------------
   const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 
-  function iniciarNivel2() {
-    const botonNivel2 = document.getElementById("botonNivel2");
-    const itemsReciclar = document.getElementById('itemsReciclar');
-    const contenedorNivel2 = document.getElementById('contenedorNivel2');
-    itemsReciclar.innerHTML = '';
-    contenedorNivel2.innerHTML = '';
+    function iniciarNivel2() {
+      const botonNivel2 = document.getElementById("botonNivel2");
+      const itemsReciclar = document.getElementById("itemsReciclar");
+      const contenedorNivel2 = document.getElementById("contenedorNivel2");
+      const btnSiguienteJugador = document.getElementById("btnSiguienteJugador");
 
-    function disabledboton(){
-      const botones = botonNivel2.querySelectorAll('input');
-      botones.forEach( bt=>{
-        bt.disabled =true;
-        bt.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-100');
-      })
-    }
+      // Limpia contenedores
+      itemsReciclar.innerHTML = "";
+      contenedorNivel2.innerHTML = "";
 
-    disabledboton();
+      // 🔹 Crear residuos
+      residuosAleatorios.forEach(residuo => {
+        const card = document.createElement("div");
+        card.className = "flex flex-col items-center p-2 bg-white rounded shadow cursor-move";
+        card.draggable = true;
+        card.dataset.residuoId = residuo.id;
+        card.setAttribute('role', 'button');
 
-    // crear residuos
-    residuosAleatorios.forEach(residuo => {
-      const card = document.createElement('div');
-      card.className = 'flex flex-col items-center p-2 bg-white rounded shadow cursor-move';
-      card.draggable = true;
-      card.dataset.residuoId = residuo.id;
-      card.setAttribute('role', 'button');
+        const img = document.createElement("img");
+        img.src = residuo.imagen;
+        img.alt = residuo.nombre;
+        img.className = "w-20 h-20 object-contain mb-1";
 
-      const img = document.createElement('img');
-      img.src = residuo.imagen;
-      img.alt = residuo.nombre;
-      img.className = 'w-20 h-20 object-contain mb-1';
+        const span = document.createElement("span");
+        span.textContent = residuo.nombre;
+        span.className = "text-sm text-center";
 
-      const span = document.createElement('span');
-      span.textContent = residuo.nombre;
-      span.className = 'text-sm text-center';
+        card.appendChild(img);
+        card.appendChild(span);
+        itemsReciclar.appendChild(card);
 
-      card.appendChild(img);
-      card.appendChild(span);
-      itemsReciclar.appendChild(card);
-
-      if (!isTouch) {
-        card.addEventListener('dragstart', (e) => {
-          e.dataTransfer.setData('residuoId', residuo.id);
+        // arrastrar
+          card.addEventListener("dragstart", e => {
+            e.dataTransfer.setData("residuoId", residuo.id);
         });
-      } else {
-        // touch fallback selection (no cambiar)
-      }
-    });
-
-    // crear tachos como zonas drop
-    tachos.forEach(tacho => {
-      const card = document.createElement('div');
-      card.className = 'flex flex-col items-center p-3 bg-white rounded shadow text-center';
-      card.dataset.tachoColor = tacho.color;
-      card.dataset.tachoId = tacho.id;
-      card.setAttribute('aria-label', tacho.nombre);
-
-      const img = document.createElement('img');
-      img.src = tacho.image;
-      img.alt = tacho.nombre;
-      img.className = 'w-24 h-24 object-cover mb-1 rounded';
-
-      const span = document.createElement('span');
-      span.textContent = tacho.nombre;
-      span.className = 'text-sm';
-
-      card.appendChild(img);
-      card.appendChild(span);
-      contenedorNivel2.appendChild(card);
-
-      // handlers for drop
-      card.addEventListener('dragover', (e) => e.preventDefault());
-      card.addEventListener('drop', (e) => {
-        e.preventDefault();
-        const residuoId = e.dataTransfer.getData('residuoId');
-        handleDrop(String(residuoId), tacho);
       });
 
-      // touch fallback: tap a tacho to drop selectedResiduo (if implemented)
-    });
+      // 🔹 Crear tachos (zonas de drop)
+      tachos.forEach(tacho => {
+        const card = document.createElement("div");
+        card.className = "flex flex-col items-center p-3 bg-white rounded shadow text-center";
+        card.dataset.tachoColor = tacho.color;
+        card.setAttribute('aria-label', tacho.nombre);
 
-    // selectedResiduo used on touch devices (optional)
-    let selectedResiduo = null;
+        const img = document.createElement("img");
+        img.src = tacho.image;
+        img.alt = tacho.nombre;
+        img.className = "w-24 h-24 object-cover mb-1 rounded";
 
-    function handleDrop(residuoId, tacho) {
-      const residuo = residuos.find(r => String(r.id) === String(residuoId));
-      if (!residuo) return;
+        const span = document.createElement("span");
+        span.textContent = tacho.nombre;
+        span.className = "text-sm";
 
-      if (!jugadorActivo) {
-        Swal.fire('Atención', 'Debe seleccionar un jugador antes de jugar', 'warning');
-        return;
-      }
+        card.appendChild(img);
+        card.appendChild(span);
+        contenedorNivel2.appendChild(card);
 
-      const jugadorData = respuestasJugadores[jugadorActivo];
-      if (!jugadorData) return;
-
-      if (residuo.tacho === tacho.color) {
-        jugadorData.puntaje += 1;
-        Swal.fire({ toast:true, position:'top-end', icon:'success', title:`${residuo.nombre} va en ${tacho.nombre}`, showConfirmButton:false, timer:900 });
-      } else {
-        Swal.fire({ toast:true, position:'top-end', icon:'error', title:`${residuo.nombre} no va en ${tacho.nombre}`, showConfirmButton:false, timer:900 });
-        // restar decimales con precaución
-        jugadorData.puntaje = parseFloat((jugadorData.puntaje - 0.35).toFixed(2));
-      }
-
-      // actualizar UI puntaje
-      updatePlayerUI(jugadorActivo);
-      currentBadge.textContent = `Puntos: ${jugadorData.puntaje}`;
-
-      // remover residuo del DOM
-      const elem = document.querySelector(`[data-residuo-id="${residuoId}"]`);
-      if (elem) elem.remove();
-
-      // si ya no quedan residuos, terminar el turno
-      if (itemsReciclar.children.length === 0) {
-        // guardar puntaje y tiempo
-        guardarPuntaje(jugadorActivo, jugadorData.puntaje);
-        guardarTiempo(jugadorActivo);
-
-        Swal.fire('🎉 Fin del turno', `${jugadorData.nombre} terminó con ${jugadorData.puntaje} puntos`, 'success').then(() => {
-          // marcar jugador como finalizado y deshabilitar solo a él; habilitar otros
-          disablePlayer(jugadorActivo);
-          // limpiar UI y volver a nivel1 para siguiente jugador
-          //document.getElementById('nivel2').classList.add('hidden');
-          //document.getElementById('nivel1').classList.remove('hidden');
-          // reset jugador activo y display
-          jugadorActivo = null;
-          jugadorActivoDisplay.textContent = '—';
-          currentBadge.textContent = '';
-          // reiniciar nombres para próximo jugador
-          iniciarNivel1();
+        card.addEventListener("dragover", e => e.preventDefault());
+        card.addEventListener("drop", e => {
+          e.preventDefault();
+          const residuoId = e.dataTransfer.getData("residuoId");
+          handleDrop(residuoId, tacho);
         });
+      });
+
+      // 🔹 Función para desactivar/activar los botones
+      function disabledBtn2() {
+        const botones = document.querySelectorAll("#botonNivel2 input[type='button']");
+        if (itemsReciclar.children.length > 0) {
+          botones.forEach(btn => {
+            btn.disabled = true;
+            btn.classList.add("opacity-50", "bg-gray-300", "cursor-not-allowed");
+          });
+        } else {
+          botones.forEach(btn => {
+            btn.disabled = false;
+            btn.classList.remove("opacity-50", "bg-gray-300", "cursor-not-allowed");
+          });
+        }
+      }
+
+      // Estado inicial
+      disabledBtn2();
+
+      // 🔹 Manejar drops
+      function handleDrop(residuoId, tacho) {
+        const residuo = residuos.find(r => String(r.id) === String(residuoId));
+        if (!residuo) return;
+
+        const jugadorData = respuestasJugadores[jugadorActivo];
+        if (!jugadorData) return;
+
+        if (residuo.tacho === tacho.color) {
+          jugadorData.puntaje += 1;
+          Swal.fire({
+            toast: true,
+            position: "top-end",
+            icon: "success",
+            title: `${residuo.nombre} va en ${tacho.nombre}`,
+            showConfirmButton: false,
+            timer: 900,
+          });
+        } else {
+          jugadorData.puntaje = parseFloat((jugadorData.puntaje - 0.35).toFixed(2));
+          Swal.fire({
+            toast: true,
+            position: "top-end",
+            icon: "error",
+            title: `${residuo.nombre} no va en ${tacho.nombre}`,
+            showConfirmButton: false,
+            timer: 900,
+          });
+        }
+
+        updatePlayerUI(jugadorActivo);
+        currentBadge.textContent = `Puntos: ${jugadorData.puntaje}`;
+
+        const elem = document.querySelector(`[data-residuo-id="${residuoId}"]`);
+        if (elem) elem.remove();
+
+        disabledBtn2(); // 🔹 actualizar estado botones
+
+        // 🔹 Si no quedan residuos → fin del turno
+        if (itemsReciclar.children.length === 0) {
+          guardarPuntaje(jugadorActivo, jugadorData.puntaje);
+          guardarTiempo(jugadorActivo);
+
+          Swal.fire(
+            "🎉 Fin del turno",
+            `${jugadorData.nombre} terminó con ${jugadorData.puntaje} puntos`,
+            "success"
+          ).then(() => {
+            disablePlayer(jugadorActivo);
+            jugadorActivo = null;
+            jugadorActivoDisplay.textContent = "—";
+            currentBadge.textContent = "";
+
+            // 🔹 Activar botón "Siguiente Jugador"
+            btnSiguienteJugador.disabled = false;
+            btnSiguienteJugador.classList.remove("opacity-50", "cursor-not-allowed");
+
+            btnSiguienteJugador.addEventListener("click", async() => {
+                const {value : login} = await Swal.fire({
+                title: "Ingresa su DNI",
+                input: "text",
+                inputAttributes: { autocapitalize: "off" },
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showCancelButton: false,
+                confirmButtonText: "Ingresar",
+                showLoaderOnConfirm: true,
+                preConfirm: async (login) => {
+                  if (!login) {
+                    Swal.showValidationMessage("Por favor ingresa tu DNI");
+                    return false;
+                  }
+                  try {
+                    const response = await fetch("../sources/php/buscar_DNI.php", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ DNI: login }),
+                    });
+                  if (!response.ok) throw new Error("Error con la conexión");
+                  const data = await response.json();
+                  if (data.length === 0) {
+                    Swal.showValidationMessage("DNI no encontrado");
+                    return false;
+                  }
+                    return data[0];
+                  } catch (error) {
+                    Swal.showValidationMessage(`ERROR: ${error.message}`);
+                  }
+                }
+              });
+              if(!login)return;
+
+              const params = new URLSearchParams(window.location.search);
+              const areaActual = params.get('area');
+              const nuevaArea = login.u_Area;
+              const nuevoDni = login.u_DNI;
+
+              if(nuevaArea === areaActual){
+                params.set("dni", nuevoDni);
+                const nuevaURL = `${window.location.pathname}?${params.toString()} `;
+                window.history.replaceState({}, '',nuevaURL);
+                document.getElementById('nivel2').classList.add('hidden');
+                document.getElementById('nivel1').classList.remove('hidden');
+                iniciarNivel1();
+              }else{
+                Swal.fire({
+                  icon: "warning",
+                  title: 'Area diferente',
+                  text: `El usuario no pertecene al area ${nuevaArea}. Redirigiendo.. `,
+                  timer: 2500,
+                  showConfirmButton: false
+                }).then(() =>{
+                  window.location.href= "inicio.html?area=" + encodeURIComponent(nuevaArea)+"&dni="+encodeURIComponent(nuevoDni);
+                })
+              }
+              });
+            });
+          }
+        
       }
     }
-  }
+
 
   // ---------------------------
   // UI helpers (toggle players, reset)
@@ -672,20 +749,74 @@
         btn.classList.remove('opacity-50','bg-gray-100','cursor-not-allowed');
       }
     });
-
+    /*
     currentBadge.textContent = '';
     jugadorActivo = null;
     jugadorActivoDisplay.textContent = '—';
     document.getElementById('nivel2').classList.add('hidden');
     document.getElementById('nivel1').classList.remove('hidden');
-    iniciarNivel1();
+    iniciarNivel1();*/
   });
 
   // inicializar
   window.addEventListener('load', () => {
+    Swal.fire({toast: true, position: 'center', 
+      html: `
+      <div style="text-align: left; font-size: 20px; line-height: 1.6; max-height: 400px; overflow-y: auto; padding-right: 10px;">
+        <p style="text-align: center"; font-size: 30px ><b>Reglas Oficiales del Desafío: "Misión Reciclaje"</b><p/>
+        <hr style="margin: 10px 0;">
+        <p><b>“Piensa, actúa y segrega”</b></p>
+        <p>“Cambia tus hábitos, cambia el mundo.”</p>
+        <p>“Haz la diferencia, segrega tus residuos.”</p>
+        <p>“Desafío ecológico: ¿reciclas o contaminas?”</p>
+        <p>“El futuro se recicla hoy.”</p>
+        <p>“¡Acepta el reto y salva el planeta!”</p>
+        <p>“Cada residuo tiene su lugar.”</p>
+        <hr style="margin: 10px 0;">
+        <p><b>🎯 Objetivo:</b> Fomentar el conocimiento sobre <b>GESTIÓN DE RESIDUOS SÓLIDOS</b> y la correcta <b>SEGREGACIÓN</b> de residuos de una manera divertida y colaborativa, promoviendo el trabajo en equipo y nuestro compromiso con la sostenibilidad.</p>
+        <hr style="margin: 10px 0;">
+        <p><b>📅 Fechas y Duración:</b> El desafío estará activo desde el <b>lunes 20 de octubre de 2025 a las 9:00 a.m.</b> hasta el <b>viernes 24 de octubre de 2025 a las 5:00 p.m.</b> Cada colaborador puede jugar una sola vez dentro de este período.</p>
+        <hr style="margin: 10px 0;">
+        <p><b>👥 Participación:</b> Abierta a todos los colaboradores de la empresa. Cada jugador representará el área al que pertenece formalmente.</p>
+        <p><b>🧩 Dinámica del Juego:</b> El juego consta de dos niveles con preguntas y desafíos sobre reciclaje. Las preguntas se mostrarán en orden aleatorio para cada participante. Incluye temas sobre <b>la segregación</b> de residuos.</p>
+        <p><b>🏅 Puntaje:</b> Cada respuesta correcta equivale a <b>1 punto</b>. En la segunda etapa, se restarán <b>0.35 puntos</b> por cada error, además de que la imagen será cambiada por otra opción.</p>
+        <p><b>⏱️ Cronometraje:</b> El cronómetro inicia automáticamente al comenzar el juego y se detiene al completar el último nivel. No se puede pausar.</p>
+        <p><b>📊 Sistema de Puntuación por Área:</b> El puntaje final de cada área será el <b>promedio</b> de los puntajes individuales obtenidos por sus miembros, garantizando una competencia equitativa.</p>
+        <p><b>⚖️ Criterio de Desempate:</b> En caso de empate, ganará el área con el menor tiempo promedio de completado.</p>
+        <p><b>🛠️ Juego Limpio y Soporte Técnico:</b>Se apela a la honestidad y al espíritu de aprendizaje individual. Si enfrentas un problema técnico que interrumpe tu juego (ej: la página se congela), no te preocupes. Reporta el incidente con una captura de pantalla al número <b>959 738 482</b> para recibir asistencia y poder reiniciar tu participación.</p>
+        <p><b>🏆 Anuncio de Ganadores y Reconocimiento:</b> Los resultados se anunciarán el <b>lunes 27 de octubre</b>. El área ganadora recibirá un reconocimiento especial. También se mencionará a los <b>3 mejores puntajes individuales</b> de toda la empresa.</p>
+        <hr style="margin: 10px 0;">
+        <p><b>¡Mucha suerte a todos y que gane el área con la mejor cultura de segregación y reciclaje!</b></p>
+      </div>`,
+      confirmButtonText: '¡Entendido!',
+      confirmButtonColor: '#16a34a',
+      allowOutsideClick: false,
+      width: 800,
+      customClass: {
+      confirmButton: 'custom-confirm-button',
+      popup: 'custom-popup'
+    }
+    
+    });
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .custom-popup {
+        display: flex !important;
+        flex-direction: column;
+        align-items: center;
+      }
+      .custom-confirm-button {
+        font-weight: bold !important;
+        padding: 16px 30px !important;
+        border-radius: 12px !important;
+      }
+    `;
+    document.head.appendChild(style);
+    
+  });   
     document.getElementById('nivel1').classList.remove('hidden');
-    iniciarNivel1();
-  });
+    iniciarNivel1();        
+  
 </script>
 
 </body>
