@@ -11,16 +11,16 @@ if (empty($usuario_id)) {
     exit;
 }
 
-$stmt = $conn->prepare("UPDATE usuarios SET tiempo = ? WHERE id = ?");
-$stmt->bind_param("ii", $tiempo, $usuario_id);
-$stmt->execute();
-
-if ($stmt->affected_rows > 0) {
-    echo json_encode(["status" => "success", "msg" => "Tiempo actualizado"]);
-} else {
-    echo json_encode(["status" => "error", "msg" => "No se actualizó ningún registro"]);
+try{            
+    $stmt = $conexion->prepare("UPDATE usuario SET tiempo = ? WHERE u_idUsuario = ?");
+    $stmt->execute([$tiempo, $usuario_id]);
+    
+    if ($stmt->rowCount() > 0) {
+        echo json_encode(["status" => "success", "msg" => "Tiempo actualizado"]);
+    } else {
+        echo json_encode(["status" => "error", "msg" => "No se actualizó ningún registro"]);
+    }
+}catch(PDOException $e){
+    echo json_encode(["status" => "error", "msg" => $e->getMessage()]);
 }
-
-$stmt->close();
-$conn->close();
 ?>

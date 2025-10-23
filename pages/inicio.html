@@ -19,7 +19,7 @@
         </div>
         
         <div class="col-start-5">
-            <a href="../index.html" class="end"><img src="../sources/imagess/logo_blanco.png" alt="Logo" class="h-20 w-auto object-contain"  /></a>         
+            <img src="../sources/imagess/logo_blanco.png" alt="Logo" class="h-20 w-auto object-contain" />        
         </div>
       </div>
 
@@ -43,9 +43,7 @@
           <h2 class="font-semibold text-2xl uppercase">Jugadores</h2>
           <span id="currentBadge" class="ml-4 text-sm text-gray-600 text-red-600 text-center"></span>          
         </div>
-        <span id="lista" class=" block gap-3"></span>
-
-        <div class="mt-4 text-sm text-gray-600 italic">Selecciona un jugador para iniciar.</div>
+        <span id="lista" class=" block gap-3"></span>        
       </div>
     </aside>
 
@@ -93,7 +91,7 @@
           </div>
         </div>
         <div id="botonNivel2" class="justify-end flex gap-4">
-          <input type="button" value= "Terminar Juego" class="cursor-pointer w-[8rem] h-12 rounded-lg bg-lime-600 text-white ">
+          <input id="btnTerminarJuego" type="button" value= "Terminar Juego" class="cursor-pointer w-[8rem] h-12 rounded-lg bg-lime-600 text-white ">
           <input id="btnSiguienteJugador" type="button" value= "Siguiente Jugador" class="cursor-pointer w-[10rem] h-12 rounded-lg bg-lime-600 text-white ">
         </div>
       </div>
@@ -231,11 +229,7 @@
         ch.disabled = true;
         ch.dataset.finished = "true";
         ch.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-100');
-      } else {
-        // habilitar los otros
-        ch.disabled = false;
-        ch.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-100');
-      }
+      } 
     });
   }
 
@@ -295,7 +289,7 @@
       .catch(err => console.error('Error cargando jugadores:', err));
   }
 
-  cargarJugadores();
+
 
   // ---------------------------
   // setJugadorActivo (solo muestra nombre en el display)
@@ -332,7 +326,7 @@
       const minutos = Math.floor(contadorSegundos / 60);
       const resto = contadorSegundos % 60;
       // no mostramos aquí puntaje, sino tiempo (si lo deseas)
-      currentBadge.textContent = `Tiempo: ${minutos}m ${resto}s`;
+      currentBadge.textContent = `tiempo: ${minutos}m ${resto}s`;
       // mantendremos solo puntaje visible, y puedes guardar tiempo con guardarTiempo()
     }, 1000);
   }
@@ -366,7 +360,9 @@
   }
 
   function guardarTiempo(jugadorActivoParam) {
-    const tiempoTexto = currentBadge.textContent.trim();
+    console.log("jugador activo" , jugadorActivoParam);
+    const tiempoTexto = currentBadge.textContent.trim().replace('tiempo:', '').trim();
+
     // No cambiamos parseo aqui (lo tenías definido)
     const match = tiempoTexto.match(/(?:(\d+)m)?\s*(\d+)s/);
     let minutos = 0, segundos = 0;
@@ -374,7 +370,8 @@
       minutos = parseInt(match[1] || 0);
       segundos = parseInt(match[2] || 0);
     }
-    const totalSegundos = minutos * 60 + segundos;
+
+    const totalSegundos = minutos * 60 + segundos;    
     return fetch('../sources/php/guardarTiempo.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -392,6 +389,7 @@
       else console.error('⚠️ Error al guardar tiempo:', data.msg);
     })
     .catch(err => console.error('Error enviando tiempo:', err));
+
   }
 
   // ---------------------------
@@ -476,7 +474,6 @@
 
         // actualizar UI y backend opcionalmente
         updatePlayerUI(jugadorActivo);
-        currentBadge.textContent = `Puntos: ${jugadorData.puntaje}`;
         guardarPuntaje(jugadorActivo, jugadorData.puntaje);
       } else {
         // error visual
@@ -494,8 +491,7 @@
       // comprobar fin de nivel 1
       if (contenedorNombre.children.length === 0) {
         Swal.fire('Nivel 1 TERMINADO', `${jugadorData.nombre} terminó con ${jugadorData.puntaje} puntos`, 'success').then(() => {
-          // deshabilitar jugador que ya jugó, habilitar otros
-          disablePlayer(jugadorActivo);
+
           // guardar puntaje y pasar a nivel 2
           guardarPuntaje(jugadorActivo, jugadorData.puntaje).then(() => {
             document.getElementById('nivel1').classList.add('hidden');
@@ -519,6 +515,7 @@
       const itemsReciclar = document.getElementById("itemsReciclar");
       const contenedorNivel2 = document.getElementById("contenedorNivel2");
       const btnSiguienteJugador = document.getElementById("btnSiguienteJugador");
+      const btnTerminaJuego = document.getElementById("btnTerminarJuego");
 
       // Limpia contenedores
       itemsReciclar.innerHTML = "";
@@ -563,12 +560,8 @@
         img.alt = tacho.nombre;
         img.className = "w-24 h-24 object-cover mb-1 rounded";
 
-        const span = document.createElement("span");
-        span.textContent = tacho.nombre;
-        span.className = "text-sm";
-
         card.appendChild(img);
-        card.appendChild(span);
+        /*card.appendChild(span);*/
         contenedorNivel2.appendChild(card);
 
         card.addEventListener("dragover", e => e.preventDefault());
@@ -629,7 +622,6 @@
         }
 
         updatePlayerUI(jugadorActivo);
-        currentBadge.textContent = `Puntos: ${jugadorData.puntaje}`;
 
         const elem = document.querySelector(`[data-residuo-id="${residuoId}"]`);
         if (elem) elem.remove();
@@ -639,33 +631,32 @@
         // 🔹 Si no quedan residuos → fin del turno
         if (itemsReciclar.children.length === 0) {
           guardarPuntaje(jugadorActivo, jugadorData.puntaje);
-          guardarTiempo(jugadorActivo);
+          guardarTiempo(jugadorActivo).then(()=>{
+            currentBadge.textContent = '';
+              
+            Swal.fire(
+              "🎉 Fin del turno",
+              `${jugadorData.nombre} terminó con ${jugadorData.puntaje} puntos`,
+              "success"
+            ).then(() => {
+              disablePlayer(jugadorActivo);
+              jugadorActivo = null;
+              jugadorActivoDisplay.textContent = "—";            
+              currentBadge.textContent = '';
+              btnSiguienteJugador.disabled = false;
+              btnSiguienteJugador.classList.remove("opacity-50", "cursor-not-allowed");
 
-          Swal.fire(
-            "🎉 Fin del turno",
-            `${jugadorData.nombre} terminó con ${jugadorData.puntaje} puntos`,
-            "success"
-          ).then(() => {
-            disablePlayer(jugadorActivo);
-            jugadorActivo = null;
-            jugadorActivoDisplay.textContent = "—";
-            currentBadge.textContent = "";
-
-            // 🔹 Activar botón "Siguiente Jugador"
-            btnSiguienteJugador.disabled = false;
-            btnSiguienteJugador.classList.remove("opacity-50", "cursor-not-allowed");
-
-            btnSiguienteJugador.addEventListener("click", async() => {
+              btnSiguienteJugador.addEventListener("click", async() => {
                 const {value : login} = await Swal.fire({
-                title: "Ingresa su DNI",
-                input: "text",
-                inputAttributes: { autocapitalize: "off" },
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                showCancelButton: false,
-                confirmButtonText: "Ingresar",
-                showLoaderOnConfirm: true,
-                preConfirm: async (login) => {
+                  title: "Ingresa su DNI",
+                  input: "text",
+                  inputAttributes: { autocapitalize: "off" },
+                  allowOutsideClick: false,
+                  allowEscapeKey: false,
+                  showCancelButton: true,
+                  confirmButtonText: "Ingresar",
+                  showLoaderOnConfirm: true,
+                  preConfirm: async (login) => {
                   if (!login) {
                     Swal.showValidationMessage("Por favor ingresa tu DNI");
                     return false;
@@ -688,6 +679,7 @@
                   }
                 }
               });
+
               if(!login)return;
 
               const params = new URLSearchParams(window.location.search);
@@ -715,8 +707,38 @@
               }
               });
             });
-          }
-        
+
+
+            btnTerminaJuego.disabled =  false;
+            btnTerminaJuego.classList.remove("opacity-50", "cursor-not-allowed");
+
+            btnTerminaJuego.addEventListener('click', ()=>{
+              Swal.fire({
+                title: "¿Deseas finalizar el juego?",
+                icon: "question",
+                confirmButtonText: "Si, finalizar",
+                cancelButtonText: "Cancelar",
+                allowEscapeKey: false,
+                allowOutsideClick: false,
+                showCancelButton: true          
+              }).then((result)=>{
+                if(result.isConfirmed){
+                  swal.fire({
+                    title: "Juego finalizado",
+                    text:"Redirigiendo al menu de areas",
+                    icon: "success",
+                    showCancelButton: false,
+                    timer :1500 ,
+                    willClose: ()=>{                      
+                      window.location.href = "../areas.html";
+                    }
+                  })
+                }
+                })
+              
+            })
+          }              
+        )}
       }
     }
 
@@ -749,30 +771,17 @@
         btn.classList.remove('opacity-50','bg-gray-100','cursor-not-allowed');
       }
     });
-    /*
-    currentBadge.textContent = '';
-    jugadorActivo = null;
-    jugadorActivoDisplay.textContent = '—';
-    document.getElementById('nivel2').classList.add('hidden');
-    document.getElementById('nivel1').classList.remove('hidden');
-    iniciarNivel1();*/
+    
   });
 
   // inicializar
   window.addEventListener('load', () => {
     Swal.fire({toast: true, position: 'center', 
       html: `
-      <div style="text-align: left; font-size: 20px; line-height: 1.6; max-height: 400px; overflow-y: auto; padding-right: 10px;">
-        <p style="text-align: center"; font-size: 30px ><b>Reglas Oficiales del Desafío: "Misión Reciclaje"</b><p/>
+      <div style="text-align: left; font-size: 20px; line-height: 1.6; max-height: 400px; overflow-y: auto; padding-right: 10px;">        
+        <p style="text-align:center; font-size : 2rem; color: #3BED2D" ><b>“Piensa, actúa y segrega”</b></p>
         <hr style="margin: 10px 0;">
-        <p><b>“Piensa, actúa y segrega”</b></p>
-        <p>“Cambia tus hábitos, cambia el mundo.”</p>
-        <p>“Haz la diferencia, segrega tus residuos.”</p>
-        <p>“Desafío ecológico: ¿reciclas o contaminas?”</p>
-        <p>“El futuro se recicla hoy.”</p>
-        <p>“¡Acepta el reto y salva el planeta!”</p>
-        <p>“Cada residuo tiene su lugar.”</p>
-        <hr style="margin: 10px 0;">
+        <p style= "font-size: 25px; margin:0px 10px" ><b>Reglas Oficiales del Desafío: </b><p/>
         <p><b>🎯 Objetivo:</b> Fomentar el conocimiento sobre <b>GESTIÓN DE RESIDUOS SÓLIDOS</b> y la correcta <b>SEGREGACIÓN</b> de residuos de una manera divertida y colaborativa, promoviendo el trabajo en equipo y nuestro compromiso con la sostenibilidad.</p>
         <hr style="margin: 10px 0;">
         <p><b>📅 Fechas y Duración:</b> El desafío estará activo desde el <b>lunes 20 de octubre de 2025 a las 9:00 a.m.</b> hasta el <b>viernes 24 de octubre de 2025 a las 5:00 p.m.</b> Cada colaborador puede jugar una sola vez dentro de este período.</p>
@@ -783,10 +792,10 @@
         <p><b>⏱️ Cronometraje:</b> El cronómetro inicia automáticamente al comenzar el juego y se detiene al completar el último nivel. No se puede pausar.</p>
         <p><b>📊 Sistema de Puntuación por Área:</b> El puntaje final de cada área será el <b>promedio</b> de los puntajes individuales obtenidos por sus miembros, garantizando una competencia equitativa.</p>
         <p><b>⚖️ Criterio de Desempate:</b> En caso de empate, ganará el área con el menor tiempo promedio de completado.</p>
-        <p><b>🛠️ Juego Limpio y Soporte Técnico:</b>Se apela a la honestidad y al espíritu de aprendizaje individual. Si enfrentas un problema técnico que interrumpe tu juego (ej: la página se congela), no te preocupes. Reporta el incidente con una captura de pantalla al número <b>959 738 482</b> para recibir asistencia y poder reiniciar tu participación.</p>
+        <p><b>🛠️ Juego Limpio y Soporte Técnico:</b>Se apela a la honestidad y al espíritu de aprendizaje individual. Si enfrentas un problema técnico que interrumpe tu juego (ej: la página se congela), no te preocupes. Reporta el incidente con una captura de pantalla al número <b>959 738 482 (Hugo Reyes - Asistente de T.I)</b> para recibir asistencia y poder reiniciar tu participación.</p>
         <p><b>🏆 Anuncio de Ganadores y Reconocimiento:</b> Los resultados se anunciarán el <b>lunes 27 de octubre</b>. El área ganadora recibirá un reconocimiento especial. También se mencionará a los <b>3 mejores puntajes individuales</b> de toda la empresa.</p>
         <hr style="margin: 10px 0;">
-        <p><b>¡Mucha suerte a todos y que gane el área con la mejor cultura de segregación y reciclaje!</b></p>
+        <p style="text-align: center"><b>¡Mucha suerte a todos y que gane el área con la mejor cultura de segregación y reciclaje!</b></p>
       </div>`,
       confirmButtonText: '¡Entendido!',
       confirmButtonColor: '#16a34a',
@@ -797,6 +806,8 @@
       popup: 'custom-popup'
     }
     
+    }).then((result) =>{
+      cargarJugadores();
     });
     const style = document.createElement('style');
     style.innerHTML = `
@@ -813,10 +824,10 @@
     `;
     document.head.appendChild(style);
     
-  });   
+  });
     document.getElementById('nivel1').classList.remove('hidden');
     iniciarNivel1();        
-  
+
 </script>
 
 </body>
