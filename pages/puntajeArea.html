@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Document</title>
+</head>
+<body class="p-0 m-0 flex justify-center ">
+    <div class="w-[40%] h-[40rem] bg-gray-200 border-b-8 flex justify-center rounded-2xl">
+        <h1 class="text-4xl font-semibold"> Lista de Jugadores</h1>
+        <ul id="lista" class=""></ul>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const area =  params.get('area');
+        const lista = document.getElementById("lista");        
+
+    </script>
+</body>
+</html>

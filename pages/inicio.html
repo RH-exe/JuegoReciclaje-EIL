@@ -261,7 +261,7 @@
             finished: false
           };
 
-          const btn = crearBotonJugador(j.u_idUsuario, j.u_nombre, 0, false, false);
+          const btn = crearBotonJugador(j.u_idUsuario, j.u_nombre, j.puntaje, false, false);
           listaJugador.appendChild(btn);
         });
 
@@ -657,26 +657,29 @@
                   confirmButtonText: "Ingresar",
                   showLoaderOnConfirm: true,
                   preConfirm: async (login) => {
-                  if (!login) {
-                    Swal.showValidationMessage("Por favor ingresa tu DNI");
-                    return false;
-                  }
-                  try {
-                    const response = await fetch("../sources/php/buscar_DNI.php", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ DNI: login }),
-                    });
-                  if (!response.ok) throw new Error("Error con la conexión");
-                  const data = await response.json();
-                  if (data.length === 0) {
-                    Swal.showValidationMessage("DNI no encontrado");
-                    return false;
-                  }
-                    return data[0];
-                  } catch (error) {
-                    Swal.showValidationMessage(`ERROR: ${error.message}`);
-                  }
+                    if (!login) {
+                      Swal.showValidationMessage("Por favor ingresa tu DNI");
+                      return false;
+                    }
+                    try {
+                      const response = await fetch("../sources/php/buscar_DNI.php", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ DNI: login }),
+                      });
+                    if (!response.ok) throw new Error("Error con la conexión");
+                    const data = await response.json();
+                    if (data.length === 0) {
+                      Swal.showValidationMessage("DNI no encontrado");
+                      return false;
+                    }
+                    if(data[0].puntaje > 0){
+                      swal.showValidationMessage(`El DNi registrado ya jugo` );
+                    }
+                      return data[0];
+                    } catch (error) {
+                      Swal.showValidationMessage(`ERROR: ${error.message}`);
+                    }
                 }
               });
 

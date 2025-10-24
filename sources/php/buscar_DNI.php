@@ -4,6 +4,7 @@
 
  $data= json_decode(file_get_contents("php://input"),true);
  $dni = $data["DNI"] ?? '';
+ $puntaje = $data["puntaje"] ?? null;
 
  if(empty($dni)){
     echo json_encode(["error" => "DNI no recibido"]);
@@ -11,7 +12,7 @@
  }
 
  try{
-    $sql = "SELECT u_DNI, u_Area from usuario where u_DNI = :dni;";
+    $sql = "SELECT u_DNI, u_Area, puntaje from usuario where u_DNI = :dni;";
     $stmt = $conexion->prepare($sql);
     $stmt -> bindParam(":dni", $dni);
     $stmt->execute();
@@ -21,5 +22,4 @@
  }catch(PDOException $e){
     echo json_encode(["error" => $e->getMessage()]);
  }
-
 ?>
