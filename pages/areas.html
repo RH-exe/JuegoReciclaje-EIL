@@ -18,10 +18,10 @@
 <body class="bg-gray-100">
 
   <!-- HEADER -->
-  <header class="bg-white border-b-8 border-lime-500 flex items-center ">
-    <img src="../sources/imagess/logo-eil.png" alt="EIL" class="h-20 w-auto px-10 py-2 my-2 ">
+  <header class="bg-white border-b-8 border-lime-500 flex items-center justify-between">
+      <img src="../sources/imagess/logo-eil.png" alt="EIL" class="h-20 w-auto px-10 py-2 my-2 ">
+      <button id="jugar" class="rounded-xl bg-blue-800 h-12 w-36 text-white mr-12"> Jugar</button>
   </header>
-
 <main class="w-full bg-[url('../sources/imagess/fondo.jpg')] bg-center bg-cover flex items-center justify-center overflow-hidden" style="height: calc(100vh - 96px); ">
   <!-- Caja de contenido -->
   <div class="bg-white/60 rounded-2xl shadow-lg p-8 w-[60%] max-w-6xl">
@@ -33,6 +33,9 @@
 </main>
   <!-- SCRIPT -->
   <script>
+    const  params = new URLSearchParams(window.location.search);
+    const usuario_DNI = params.get("dni");
+    console.log(usuario_DNI);
     const areas = [
       {nombre : "Desorción", nombreArea: "DESORCION", puntaje : 0},
       {nombre : "T.I", nombreArea: "TI",  puntaje : 0},
@@ -73,8 +76,26 @@
         button.appendChild(puntaje);
         contenedor.appendChild(button);
 
-        button.addEventListener('click', ()=>{
-          const nombreArea = button.nombre;
+        button.addEventListener('click', async ()=>{
+          const nombreArea = area.nombreArea;
+          const dni = usuario_DNI;
+          try{
+            const response = await fetch("../sources/php/buscar_DNI.php",{
+              method : "POST",
+              headers : {"Content-Type" : "application/json"},
+              body: JSON.stringify({DNI: dni})
+            })
+
+            if(!response) throw new Error ("Error con la conexion con el servisor");
+            const data = await response.json();
+            const usuario = data[0];
+
+            if(nombreArea){
+              window.location.href = `puntajeArea.html?dni=${encodeURIComponent(dni)}&area=${encodeURIComponent(nombreArea)}` ;
+            }
+          }catch(err){
+            console.log("error al encontrar el area", err)
+          }
         })
       })
     };
@@ -100,6 +121,71 @@
         blockArea();
       }
     }
+
+    const boton = document.getElementById("jugar");
+
+    boton.addEventListener('click',async ()=>{
+        const {value:login} = await swal.fire({
+            title: "ingresar  su DNI",
+            input: "text",
+            allowOutsideClick: false,
+            inputAttribures: {autocapitalize : "off"},
+            showCancelButton: true,
+            confirmButtonText: "Ingresar",
+            showLoaderOnConfirm: false,
+            preConfirm: async (dniIngresado)=>{
+                if(!dniIngresado){
+                    Swal.showValidationMessage("Por faovr Ingrese su DNI");
+                    return false;
+                }
+                try{
+                    const response = await fetch("../sources/php/buscar_DNI.php",{
+                        method :"POST",
+                        headers : {"Content-Type": "application/json"},
+                        body: JSON.stringify({DNI:dniIngresado})
+                    })
+
+                    if(!response.ok){
+                        throw new Error ("Error con la conexion con el servidor");
+                    }
+
+                    const data = await response.json();
+                    console.log("respuesta del servidor", data);
+
+                    if(!data || data.length ===0){
+                        Swal.showValidationMessage("DNI no encontrado");
+                        return false;
+                    }
+                    const puntaje = parseFloat(data[0].puntaje || 0);
+                    const nuevaArea = data[0].u_Area;
+                    const nuevoDni = data[0].u_DNI;
+
+                    if(puntaje>0){
+                        await Swal.fire({
+                        icon : "warning",
+                        text: `DNI registrado ya jugo, su puntaje es ${puntaje}`,
+                        confirmButtonText : "Ingrese un otro DNI"
+                        });
+                        ingresaDNI();
+                        return false;
+                    }else{
+                        Swal.fire({
+                            icon: "warning",
+                            title: `Redirigiendo.. `,
+                            timer: 2500,
+                            showConfirmButton: false
+                        }).then(() =>{
+                            window.location.href= "inicio.html?area=" + encodeURIComponent(nuevaArea)+"&dni="+encodeURIComponent(nuevoDni);
+                        })
+                    }         
+
+                    return data;
+                }catch(error){
+                    Swal.showValidationMessage(`Error, ${error.message}`);
+                }
+            }
+        })
+    })
 
     cargarPuntaje();
 

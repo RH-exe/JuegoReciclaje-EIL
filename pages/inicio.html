@@ -60,7 +60,6 @@
             <div class="text-xs text-gray-500">Jugador activo</div>
             <div id="jugadorActivoDisplay" class="text-lg font-bold">—</div>
           </div>
-          <button id="resetGame" class="px-3 py-2 bg-gray-100 border rounded-md text-sm">Reiniciar sesión</button>
         </div>
       </div>
 
@@ -733,7 +732,7 @@
                     showCancelButton: false,
                     timer :1500 ,
                     willClose: ()=>{                      
-                      window.location.href = "../areas.html";
+                      window.location.href = "../pages/areas.html?dni=" +encodeURIComponent(usuario_DNI);
                     }
                   })
                 }
@@ -754,28 +753,7 @@
     sb.classList.toggle('hidden');
   });
 
-  document.getElementById('resetGame').addEventListener('click', () => {
-    // reinicia todo (estado local)
-    Object.keys(respuestasJugadores).forEach(k => {
-      respuestasJugadores[k].puntaje = 0;
-      respuestasJugadores[k].respondidos = {};
-      respuestasJugadores[k].finished = false;
-    });
 
-    // reconstruir UI de la lista (manteniendo nombres)
-    [...listaJugador.children].forEach(btn => {
-      const id = btn.dataset.jugador;
-      const data = respuestasJugadores[id];
-      if (data) {
-        btn.childNodes[0].textContent = data.nombre;
-        btn.childNodes[1].textContent = data.puntaje;
-        btn.disabled = false;
-        btn.dataset.finished = "false";
-        btn.classList.remove('opacity-50','bg-gray-100','cursor-not-allowed');
-      }
-    });
-    
-  });
 
   // inicializar
   window.addEventListener('load', () => {

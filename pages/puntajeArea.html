@@ -1,22 +1,128 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Lista de Jugadores</title>
 </head>
-<body class="p-0 m-0 flex justify-center ">
-    <div class="w-[40%] h-[40rem] bg-gray-200 border-b-8 flex justify-center rounded-2xl">
-        <h1 class="text-4xl font-semibold"> Lista de Jugadores</h1>
-        <ul id="lista" class=""></ul>
+<body class="p-0 m-0 justify-center items-center min-h-screen bg-gray-100">
+    <header class="bg-white border-b-8 border-lime-500 flex items-center justify-between">
+        <img src="../sources/imagess/logo-eil.png" alt="EIL" class="h-20 w-auto px-10 py-2 my-2 ">
+        <button id="jugar" class="rounded-xl bg-blue-800 h-12 w-36 text-white mr-12"> Jugar</button>
+    </header>
+    <div class="flex justify-center items-center mt-20">
+        <div class="w-[40%] bg-white border-b-8 border-lime-500 flex flex-col items-center rounded-2xl shadow-lg p-6">
+            <h1 class="text-3xl font-semibold mb-6">Lista de Jugadores</h1>
+            <ul id="lista" class="w-full text-lg"></ul>
+        </div>
     </div>
 
-    <script>
-        const params = new URLSearchParams(window.location.search);
-        const area =  params.get('area');
-        const lista = document.getElementById("lista");        
+  <script>
+    const boton = document.getElementById("jugar");
 
-    </script>
+    boton.addEventListener('click',async ()=>{
+        const {value:login} = await swal.fire({
+            title: "ingresar  su DNI",
+            input: "text",
+            allowOutsideClick: false,
+            inputAttribures: {autocapitalize : "off"},
+            showCancelButton: true,
+            confirmButtonText: "Ingresar",
+            showLoaderOnConfirm: false,
+            preConfirm: async (dniIngresado)=>{
+                if(!dniIngresado){
+                    Swal.showValidationMessage("Por faovr Ingrese su DNI");
+                    return false;
+                }
+                try{
+                    const response = await fetch("../sources/php/buscar_DNI.php",{
+                        method :"POST",
+                        headers : {"Content-Type": "application/json"},
+                        body: JSON.stringify({DNI:dniIngresado})
+                    })
+
+                    if(!response.ok){
+                        throw new Error ("Error con la conexion con el servidor");
+                    }
+
+                    const data = await response.json();
+                    console.log("respuesta del servidor", data);
+
+                    if(!data || data.length ===0){
+                        Swal.showValidationMessage("DNI no encontrado");
+                        return false;
+                    }
+                    const puntaje = parseFloat(data[0].puntaje || 0);
+                    const nuevaArea = data[0].u_Area;
+                    const nuevoDni = data[0].u_DNI;
+
+                    if(puntaje>0){
+                        await Swal.fire({
+                        icon : "warning",
+                        text: `DNI registrado ya jugo, su puntaje es ${puntaje}`,
+                        confirmButtonText : "Ingrese un otro DNI"
+                        });
+                        ingresaDNI();
+                        return false;
+                    }else{
+                        Swal.fire({
+                            icon: "warning",
+                            title: 'Redirigiendo.. ',
+                            timer: 2500,
+                            showConfirmButton: false
+                        }).then(() =>{
+                            window.location.href= "inicio.html?area=" + encodeURIComponent(nuevaArea)+"&dni="+encodeURIComponent(nuevoDni);
+                        })
+                    }         
+
+                    return data;
+                }catch(error){
+                    Swal.showValidationMessage(`Error, ${error.message}`);
+                }
+            }
+        })
+    })
+
+
+    window.addEventListener('load', async () => {
+      const params = new URLSearchParams(window.location.search);
+      const area = params.get('area');
+      const lista = document.getElementById("lista");       
+      console.log("Área seleccionada:", area);
+        try {            
+            const response = await fetch("../sources/php/listaJugador.php", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({area: area})
+            });
+
+            if (!response.ok) throw new Error("Error con la conexión");
+
+            const data = await response.json();
+            console.log("Datos recibidos:", data);
+
+            lista.innerHTML = ""; // limpiar
+
+            if (!data || data.length === 0) {
+            lista.innerHTML = "<li class='text-center text-red-500'>No hay jugadores registrados en esta área</li>";
+            return;
+            }
+
+            // Mostrar lista de jugadores
+            data.forEach(usuario => {
+            const li = document.createElement("li");
+            li.className = "p-2 border-b border-gray-300";
+            li.textContent = `${usuario.u_nombre} — Puntaje: ${usuario.puntaje}`;
+            lista.appendChild(li);
+            });
+
+        } catch (err) {
+            console.error("Error al conectar con la BD:", err);
+            lista.innerHTML = "<li class='text-center text-red-500'>Error al cargar los datos.</li>";
+        }
+    });
+  </script>
 </body>
 </html>
